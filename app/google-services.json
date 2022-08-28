@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "644298974248",
+    "firebase_url": "https://comranet-1-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "comranet-1",
+    "storage_bucket": "comranet-1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:644298974248:android:3c9faeb5f5ef4e344f411d",
+        "android_client_info": {
+          "package_name": "com.euzhene.comranet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "644298974248-79c7m90q6nkpjlq88qqk01hfc1d5v03q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.euzhene.comranet",
+            "certificate_hash": "b9a94e782024292c0b2fc87602360ed1721dddf1"
+          }
+        },
+        {
+          "client_id": "644298974248-760kstmm34hfc9ccthnp71ibompkbl72.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdV8xiuCAZtkLEDk5seA5MXlAAPNyEVuA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "644298974248-760kstmm34hfc9ccthnp71ibompkbl72.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
