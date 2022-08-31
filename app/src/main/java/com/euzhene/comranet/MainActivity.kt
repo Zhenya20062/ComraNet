@@ -1,6 +1,7 @@
 package com.euzhene.comranet
 
 import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -45,7 +46,10 @@ class MainActivity : ComponentActivity() {
                 }
                 composable(LoginScreenDestination) {
                     val viewModel = hiltViewModel<AuthViewModel>()
-                    LoginScreen(navigator = destinationsNavigator, viewModel = viewModel, onGetUser = {user = it})
+                    LoginScreen(
+                        navigator = destinationsNavigator,
+                        viewModel = viewModel,
+                        onGetUser = { user = it })
                 }
                 composable(ChatRoomScreenDestination) {
                     val viewModel: ChatRoomViewModel by viewModels {

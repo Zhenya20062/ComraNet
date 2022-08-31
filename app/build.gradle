@@ -17,14 +17,6 @@ kotlin.sourceSets {
 }
 
 android {
-    signingConfigs {
-        release {
-            storeFile file('C:\\Users\\Euzhene\\Desktop\\Docs\\keyStoreForComranet.jks')
-            storePassword 'v26v2949'
-            keyAlias 'key0'
-            keyPassword 'v26v2949'
-        }
-    }
     compileSdk 33
 
     defaultConfig {
@@ -48,7 +40,6 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
         }
     }
     compileOptions {
