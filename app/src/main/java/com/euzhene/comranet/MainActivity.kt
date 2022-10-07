@@ -8,6 +8,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.euzhene.comranet.addChat.present.AddChatScreen
+import com.euzhene.comranet.addChat.present.AddChatViewModel
+import com.euzhene.comranet.addChat.present.SetChatInfoScreen
 import com.euzhene.comranet.autorization.presentation.AuthViewModel
 import com.euzhene.comranet.autorization.presentation.screen.LoginScreen
 import com.euzhene.comranet.autorization.presentation.screen.RegisterScreen
@@ -36,46 +39,56 @@ class MainActivity : ComponentActivity() {
     private lateinit var user: FirebaseUser
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContent {
+            val viewModel = hiltViewModel<AddChatViewModel>()
             DestinationsNavHost(navGraph = NavGraphs.root) {
-                composable(RegisterScreenDestination) {
-                    val viewModel = hiltViewModel<AuthViewModel>()
-                    RegisterScreen(navigator = destinationsNavigator, viewModel = viewModel,
-                        onGetUser = { user = it })
+                composable(AddChatScreenDestination) {
+                    AddChatScreen(navigator = destinationsNavigator, viewModel = viewModel)
                 }
-                composable(LoginScreenDestination) {
-                    val viewModel = hiltViewModel<AuthViewModel>()
-                    LoginScreen(
-                        navigator = destinationsNavigator,
-                        viewModel = viewModel,
-                        onGetUser = { user = it })
+                composable(SetChatInfoScreenDestination) {
+                    SetChatInfoScreen(navigator = destinationsNavigator, viewModel = viewModel)
                 }
-                composable(ChatRoomScreenDestination) {
-                    val viewModel: ChatRoomViewModel by viewModels {
-                        ViewModelModule.provideFactory(assistedFactory, user)
-                    }
-                    ChatRoomScreen(
-                        navigator = destinationsNavigator,
-                        viewModel = viewModel,
-                        // navArgs.user,
-                    )
-                }
-                composable(PreferenceScreenDestination) {
-                    val viewModel = hiltViewModel<PreferencesViewModel>()
-                    PreferenceScreen(
-                        navigator = destinationsNavigator,
-                        viewModel = viewModel,
-                    )
-                }
-                composable(SendImageScreenDestination) {
-                    val viewModel: ChatRoomViewModel by viewModels {
-                        ViewModelModule.provideFactory(assistedFactory, user)
-                    }
-                    SendImageScreen(navigator = destinationsNavigator, viewModel = viewModel)
-                }
-
             }
+//            DestinationsNavHost(navGraph = NavGraphs.root) {
+//                composable(RegisterScreenDestination) {
+//                    val viewModel = hiltViewModel<AuthViewModel>()
+//                    RegisterScreen(navigator = destinationsNavigator, viewModel = viewModel,
+//                        onGetUser = { user = it })
+//                }
+//                composable(LoginScreenDestination) {
+//                    val viewModel = hiltViewModel<AuthViewModel>()
+//                    LoginScreen(
+//                        navigator = destinationsNavigator,
+//                        viewModel = viewModel,
+//                        onGetUser = { user = it })
+//                }
+//                composable(ChatRoomScreenDestination) {
+//                    val viewModel: ChatRoomViewModel by viewModels {
+//                        ViewModelModule.provideFactory(assistedFactory, user)
+//                    }
+//                    ChatRoomScreen(
+//                        navigator = destinationsNavigator,
+//                        viewModel = viewModel,
+//                        // navArgs.user,
+//                    )
+//                }
+//                composable(PreferenceScreenDestination) {
+//                    val viewModel = hiltViewModel<PreferencesViewModel>()
+//                    PreferenceScreen(
+//                        navigator = destinationsNavigator,
+//                        viewModel = viewModel,
+//                    )
+//                }
+//                composable(SendImageScreenDestination) {
+//                    val viewModel: ChatRoomViewModel by viewModels {
+//                        ViewModelModule.provideFactory(assistedFactory, user)
+//                    }
+//                    SendImageScreen(navigator = destinationsNavigator, viewModel = viewModel)
+//                }
+//
+//            }
             requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
     }

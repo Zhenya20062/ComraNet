@@ -60,6 +60,7 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
+    namespace 'com.euzhene.comranet'
 }
 
 dependencies {
@@ -122,8 +123,7 @@ dependencies {
 
     //gson
     implementation 'com.google.code.gson:gson:2.9.0'
-
-
+    //
 }
 kapt {
     correctErrorTypes = true

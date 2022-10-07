@@ -8,14 +8,17 @@ import com.google.firebase.storage.ktx.storage
 
 //<--------------References---------------->
 val firebaseDatabase =
-    FirebaseDatabase.getInstance(firebaseDatabaseApi) //your api key should be here, in parentheses
+    FirebaseDatabase.getInstance(firebaseDatabaseApi) //your api key should be here, in parentheses (like https://xyz.europe-west1.firebasedatabase.app/)
 val firebaseChatReference = firebaseDatabase.getReference("chats")
 val firebaseLastFirebaseDataReference = firebaseDatabase.getReference("last_message")
+
 val queryByName =
     firebaseChatReference.orderByChild("timestamp").limitToLast(PagingDataSourceImpl.PAGE_SIZE)
 
 private val firebaseStorageRef = Firebase.storage(firebaseStorageApi).reference
 val imageStorage = firebaseStorageRef.child("images/")
+val chatImageStorage = firebaseStorageRef.child("chats_photo/")
+val userImageStorage = firebaseStorageRef.child("users_photo/")
 
 val userReference = firebaseDatabase.getReference("users")
 

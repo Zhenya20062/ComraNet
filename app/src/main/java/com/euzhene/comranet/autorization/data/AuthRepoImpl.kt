@@ -10,12 +10,15 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.getValue
+import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import java.util.*
 
 class AuthRepoImpl(
     private val userRef: DatabaseReference,
+    private val storageReference: StorageReference,
 ) : AuthRepo {
     private val auth = FirebaseAuth.getInstance()
 
@@ -72,20 +75,31 @@ class AuthRepoImpl(
             if (get().await().exists()) return Response.Error("This login is taken")
             child("username").setValue(data.username).await()
             child("email").setValue(data.email).await()
+            if (data.photoUri != null) {
+                val result =
+                    storageReference.child(UUID.randomUUID().toString()).putFile(data.photoUri)
+                        .await()
+                if (!result.task.isSuccessful) {
+                    return Response.Error(
+                        result.task.exception?.localizedMessage ?: "Storage error"
+                    )
+                }
+                val photoUrl = result.storage.downloadUrl.await().toString()
+                child("photo").setValue(photoUrl)
+            }
+
         }
         val result = auth.createUserWithEmailAndPassword(data.email, data.password).await()
-        setPhotoAndName(result.user!!, data.photoUri, data.username)
+        updateProfile(result.user!!, data.username)
         return Response.Success(result.user!!)
     }
 
-    private suspend fun setPhotoAndName(
+    private suspend fun updateProfile(
         user: FirebaseUser,
-        photo: Uri?,
         username: String,
     ) {
         user.updateProfile(
             UserProfileChangeRequest.Builder()
-                .setPhotoUri(photo)
                 .setDisplayName(username)
                 .build()
         ).await()

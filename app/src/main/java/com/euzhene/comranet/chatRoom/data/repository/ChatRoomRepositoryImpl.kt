@@ -31,7 +31,10 @@ class ChatRoomRepositoryImpl @Inject constructor(
 ) : ChatRoomRepository {
     private lateinit var user: FirebaseUser
 
+
+
     init {
+
         Log.d(TAG_DATA, "init: ")
     }
 
@@ -44,7 +47,8 @@ class ChatRoomRepositoryImpl @Inject constructor(
     }
 
     override fun observeChatData(): Flow<ChatData> {
-        return remoteDatabase.observeFirebaseData().map {
+
+        return remoteDatabase.observeFirebaseData().map() {
             mapper.mapDtoToEntity(it, user.uid)
         }
     }

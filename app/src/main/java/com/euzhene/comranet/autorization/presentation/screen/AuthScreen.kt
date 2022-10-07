@@ -44,7 +44,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 
 
-@RootNavGraph(true)
+@RootNavGraph(false)
 @Composable
 @Destination
 fun RegisterScreen(
@@ -56,7 +56,7 @@ fun RegisterScreen(
         LaunchedEffect(key1 = Unit) {
             onGetUser(viewModel.userInfo.value!!)
             navigator.navigate(ChatRoomScreenDestination()) {
-                this.popUpTo(RegisterScreenDestination) { inclusive = true }
+                popUpTo(RegisterScreenDestination) { inclusive = true }
             }
         }
 
