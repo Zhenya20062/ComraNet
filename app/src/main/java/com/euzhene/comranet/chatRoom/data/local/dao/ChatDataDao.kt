@@ -9,15 +9,15 @@ import com.euzhene.comranet.chatRoom.data.local.model.ChatDataDbModel
 
 @Dao
 interface ChatDataDao {
-    @Query("select * from chat_data order by timestamp desc")
-    fun getChatDataList(): PagingSource<Int, ChatDataDbModel>
+    @Query("select * from chat_data where chatId=:chatId order by timestamp desc")
+    fun getChatDataList(chatId: String): PagingSource<Int, ChatDataDbModel>
 
-    @Query("select * from chat_data order by timestamp asc limit 1")
-    suspend fun getLastItem():ChatDataDbModel
+    @Query("select * from chat_data where chatId=:chatId order by timestamp asc limit 1")
+    suspend fun getLastItem(chatId: String): ChatDataDbModel
 
     @Insert(entity = ChatDataDbModel::class, onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChatDataList(chatDataList: List<ChatDataDbModel>)
 
-    @Query("delete from chat_data")
-    suspend fun deleteAll()
+    @Query("delete from chat_data where chatId=:chatId")
+    suspend fun deleteAll(chatId: String)
 }

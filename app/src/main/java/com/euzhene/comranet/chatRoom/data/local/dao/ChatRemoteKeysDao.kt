@@ -8,12 +8,12 @@ import com.euzhene.comranet.chatRoom.data.local.model.ChatRemoteKeysDbModel
 
 @Dao
 interface ChatRemoteKeysDao {
-    @Query("select * from chat_remote_keys where timestamp = :timestamp")
-    suspend fun getRemoteKey(timestamp: Long): ChatRemoteKeysDbModel
+    @Query("select * from chat_remote_keys where chatId=:chatId and timestamp = :timestamp")
+    suspend fun getRemoteKey(timestamp: Long, chatId: String): ChatRemoteKeysDbModel
 
     @Insert(entity = ChatRemoteKeysDbModel::class, onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(remoteKeys: List<ChatRemoteKeysDbModel>)
 
-    @Query("delete from chat_remote_keys")
-    suspend fun deleteAll()
+    @Query("delete from chat_remote_keys where chatId=:chatId")
+    suspend fun deleteAll(chatId: String)
 }

@@ -10,4 +10,5 @@ data class ChatDataDbModel(
     val owner: Boolean,
     val type:String,
     val data:String,
+    val chatId:String,
 )

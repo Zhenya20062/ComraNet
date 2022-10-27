@@ -6,6 +6,7 @@ import com.euzhene.comranet.util.Response
 import kotlinx.coroutines.flow.Flow
 
 interface RemoteDatabase {
-    suspend fun addFirebaseData(firebaseData:FirebaseSendData): Response<Boolean>
+    suspend fun addFirebaseData(firebaseData: FirebaseSendData): Response<Boolean>
     fun observeFirebaseData(): Flow<FirebaseData>
+    var chatId: String
 }

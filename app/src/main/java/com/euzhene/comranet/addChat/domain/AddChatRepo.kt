@@ -6,6 +6,6 @@ import com.euzhene.comranet.util.Response
 import kotlinx.coroutines.flow.Flow
 
 interface AddChatRepo {
-    fun createChat(chatInfo: ChatInfo): Flow<Response<Unit>>
+    fun createChat(chatInfo: ChatInfo, userLogins:List<String>): Flow<Response<Unit>>
     suspend fun getAllUsers(): List<UserInfo>
 }

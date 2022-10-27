@@ -1,5 +1,6 @@
 package com.euzhene.comranet.addChat.present
 
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -14,22 +15,25 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.euzhene.comranet.R
 import com.euzhene.comranet.addChat.domain.entity.UserInfo
+import com.euzhene.comranet.destinations.AllChatsScreenDestination
 import com.euzhene.comranet.destinations.SetChatInfoScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @Composable
-@RootNavGraph(start = true)
+@RootNavGraph(start = false)
 @Destination
 fun AddChatScreen(
     navigator: DestinationsNavigator,
@@ -53,6 +57,7 @@ fun AddChatScreen(
     }, floatingActionButton = {
         FloatingActionButton(
             onClick = {
+
                 navigator.navigate(SetChatInfoScreenDestination())
             },
             backgroundColor = Color(0xff5291ff)
@@ -153,6 +158,16 @@ fun SetChatInfoScreen(
     navigator: DestinationsNavigator,
     viewModel: AddChatViewModel,
 ) {
+    if (viewModel.isLoading.value) {
+        createLoadingAlertDialog(title = "Creating chat...")
+    }
+    if (viewModel.success.value) {
+        navigator.popBackStack(AllChatsScreenDestination, false)
+    }
+    if (viewModel.error.value.isNotEmpty()) {
+        Toast.makeText(LocalContext.current, viewModel.error.value, Toast.LENGTH_LONG).show()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -241,4 +256,19 @@ private fun ListOfMembers(members: List<UserInfo>) {
             Text(member.username)
         }
     }
+}
+
+@Composable
+fun createLoadingAlertDialog(title: String) {
+    AlertDialog(
+        modifier = Modifier.width(200.dp),
+        onDismissRequest = {},
+        title = { Text(title) },
+        text = {
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+               },
+        buttons = {}
+    )
 }

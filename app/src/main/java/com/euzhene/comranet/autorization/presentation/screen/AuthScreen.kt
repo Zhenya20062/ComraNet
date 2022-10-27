@@ -32,6 +32,7 @@ import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.euzhene.comranet.R
 import com.euzhene.comranet.autorization.presentation.AuthViewModel
+import com.euzhene.comranet.destinations.AllChatsScreenDestination
 import com.euzhene.comranet.destinations.ChatRoomScreenDestination
 import com.euzhene.comranet.destinations.LoginScreenDestination
 import com.euzhene.comranet.destinations.RegisterScreenDestination
@@ -44,7 +45,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 
 
-@RootNavGraph(false)
+@RootNavGraph(true)
 @Composable
 @Destination
 fun RegisterScreen(
@@ -55,7 +56,7 @@ fun RegisterScreen(
     if (viewModel.shouldGoToChatRoom.value) {
         LaunchedEffect(key1 = Unit) {
             onGetUser(viewModel.userInfo.value!!)
-            navigator.navigate(ChatRoomScreenDestination()) {
+            navigator.navigate(AllChatsScreenDestination()) {
                 popUpTo(RegisterScreenDestination) { inclusive = true }
             }
         }
@@ -119,7 +120,7 @@ fun LoginScreen(
     if (viewModel.shouldGoToChatRoom.value) {
         LaunchedEffect(key1 = Unit) {
             onGetUser(viewModel.userInfo.value!!)
-            navigator.navigate(ChatRoomScreenDestination()) {
+            navigator.navigate(AllChatsScreenDestination()) {
                 this.popUpTo(RegisterScreenDestination) { inclusive = true }
             }
         }

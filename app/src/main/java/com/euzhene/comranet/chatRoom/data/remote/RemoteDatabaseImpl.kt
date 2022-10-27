@@ -18,9 +18,9 @@ import java.util.*
 
 class RemoteDatabaseImpl(
     private val chatRef: DatabaseReference,
-    private val lastDataRef: DatabaseReference,
 ) : RemoteDatabase {
-    private var shouldObserveFirstChatData = false
+    override var chatId: String = ""
+
 
     override suspend fun addFirebaseData(firebaseData: FirebaseSendData): Response<Boolean> {
         return when (firebaseData.type) {
@@ -34,16 +34,17 @@ class RemoteDatabaseImpl(
                     Response.Success(false)
                 }
                 val newFirebaseData = firebaseData.copy(data = url.toString())
-                chatRef.push().setValue(newFirebaseData).addOnCompleteListener { }
-                lastDataRef.child("last_message").removeValue().await()
-                lastDataRef.child("last_message").setValue(newFirebaseData)
+                chatRef.child(chatId).child("messages").push().setValue(newFirebaseData).addOnCompleteListener { }
+                chatRef.child(chatId).child("last_message").child("last_message").removeValue().await()
+                chatRef.child(chatId).child("last_message").child("last_message").setValue(newFirebaseData)
                     .addOnCompleteListener { }
                 Response.Success(true)
             }
             ChatDataType.MESSAGE -> {
-                chatRef.push().setValue(firebaseData).addOnCompleteListener { }
-                lastDataRef.child("last_message").removeValue().await()
-                lastDataRef.child("last_message").setValue(firebaseData).addOnCompleteListener { }
+                chatRef.child(chatId).child("messages").push().setValue(firebaseData).addOnCompleteListener { }
+                chatRef.child(chatId).child("last_message").child("last_message").removeValue().await()
+                chatRef.child(chatId).child("last_message").child("last_message").setValue(firebaseData)
+                    .addOnCompleteListener { }
                 Response.Success(true)
             }
         }
@@ -51,10 +52,8 @@ class RemoteDatabaseImpl(
 
     override fun observeFirebaseData(): Flow<FirebaseData> {
         return callbackFlow {
-            lastDataRef.addChildEventListener(object : ChildEventListener {
+            chatRef.child(chatId).child("last_message").addChildEventListener(object : ChildEventListener {
                 override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-               //     if (!shouldObserveFirstChatData) {shouldObserveFirstChatData = true; return}
-
                     val firebaseData = snapshot.getValue(FirebaseData::class.java)
                     trySend(firebaseData!!)
                 }

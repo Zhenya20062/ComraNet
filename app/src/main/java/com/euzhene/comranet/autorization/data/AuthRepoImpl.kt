@@ -91,6 +91,7 @@ class AuthRepoImpl(
         }
         val result = auth.createUserWithEmailAndPassword(data.email, data.password).await()
         updateProfile(result.user!!, data.username)
+        userRef.child(data.login).child("uid").setValue(result.user!!.uid)
         return Response.Success(result.user!!)
     }
 

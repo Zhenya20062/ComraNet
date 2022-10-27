@@ -9,7 +9,7 @@ import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.components.ViewModelComponent
 
 @Module
-@InstallIn(ActivityComponent::class)
+@InstallIn(ViewModelComponent::class)
 abstract class DomainModule {
     @Binds
     abstract fun bindChatRoomRepo(impl:ChatRoomRepositoryImpl):ChatRoomRepository

@@ -9,4 +9,5 @@ data class ChatRemoteKeysDbModel(
     val timestamp:Long,
     val prev:Long?,
     val next:Long?,
-)
+    val chatId:String,
+    )

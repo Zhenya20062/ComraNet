@@ -8,18 +8,17 @@ import com.euzhene.comranet.chatRoom.data.paging.PagingDataSourceImpl
 import com.euzhene.comranet.chatRoom.data.remote.RemoteDatabase
 import com.euzhene.comranet.chatRoom.data.remote.RemoteDatabaseImpl
 import com.euzhene.comranet.firebaseChatReference
-import com.euzhene.comranet.firebaseLastFirebaseDataReference
-import com.euzhene.comranet.queryByName
+import com.google.firebase.auth.FirebaseUser
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.scopes.ActivityScoped
+import dagger.hilt.android.scopes.ViewModelScoped
 
 @Module
-@InstallIn(ActivityComponent::class)
+@InstallIn(ViewModelComponent::class)
 abstract class DataModule {
     @Binds
     abstract fun bindRemoteDatabase(impl: RemoteDatabaseImpl): RemoteDatabase
@@ -29,19 +28,20 @@ abstract class DataModule {
 
     companion object {
         @Provides
-        @ActivityScoped
+        @ViewModelScoped
         fun provideRemoteDatabaseImpl(): RemoteDatabaseImpl {
-            return RemoteDatabaseImpl(firebaseChatReference, firebaseLastFirebaseDataReference)
+            return RemoteDatabaseImpl(firebaseChatReference)
         }
 
         @Provides
-        @ActivityScoped
+       @ViewModelScoped
         fun providePagingDataSourceImpl(
             mapper: ChatRoomMapper,
-            chatRoomDatabase: ChatRoomDatabase
+            chatRoomDatabase: ChatRoomDatabase,
+            user: FirebaseUser,
         ): PagingDataSourceImpl {
             return PagingDataSourceImpl(
-                queryByName, mapper, chatRoomDatabase
+                mapper, chatRoomDatabase, user
             )
         }
 
@@ -50,7 +50,6 @@ abstract class DataModule {
         fun provideChatRoomDB(@ApplicationContext context: Context): ChatRoomDatabase {
             return ChatRoomDatabase.getInstance(context)
         }
-
 
 
     }

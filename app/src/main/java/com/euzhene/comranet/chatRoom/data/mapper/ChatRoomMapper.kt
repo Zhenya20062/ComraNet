@@ -13,17 +13,22 @@ class ChatRoomMapper @Inject constructor() {
             firebaseData.senderUsername,
             firebaseData.senderId == userId,
             ChatDataType.valueOf(firebaseData.type),
-            firebaseData.data
+            firebaseData.data,
         )
     }
 
-    fun mapDtoToDbModel(firebaseData: FirebaseData, userId: String): ChatDataDbModel {
+    fun mapDtoToDbModel(
+        firebaseData: FirebaseData,
+        userId: String,
+        chatId: String
+    ): ChatDataDbModel {
         return ChatDataDbModel(
             timestamp = firebaseData.timestamp,
             senderUsername = firebaseData.senderUsername,
             owner = firebaseData.senderId == userId,
             type = firebaseData.type,
-            data = firebaseData.data
+            data = firebaseData.data,
+            chatId = chatId,
         )
     }
 

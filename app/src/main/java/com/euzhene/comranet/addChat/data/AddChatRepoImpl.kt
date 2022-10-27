@@ -1,5 +1,6 @@
 package com.euzhene.comranet.addChat.data
 
+import androidx.core.net.toUri
 import com.euzhene.comranet.addChat.domain.AddChatRepo
 import com.euzhene.comranet.addChat.domain.entity.ChatInfo
 import com.euzhene.comranet.addChat.domain.entity.UserInfo
@@ -14,15 +15,16 @@ import java.util.*
 
 class AddChatRepoImpl(
     private val rtdRef: DatabaseReference,
-    private val storageRef: StorageReference
+    private val userReference: DatabaseReference,
+    private val storageRef: StorageReference,
 ) : AddChatRepo {
-    override fun createChat(chatInfo: ChatInfo): Flow<Response<Unit>> {
+    override fun createChat(chatInfo: ChatInfo, userLogins:List<String>): Flow<Response<Unit>> {
         return callbackFlow {
             trySend(Response.Loading(Unit))
             var chatPhoto: String? = null
-            if (chatInfo.chatUri != null) {
+            if (chatInfo.chatPhoto != null) {
                 val uploadTask = storageRef.child(UUID.randomUUID().toString())
-                    .putFile(chatInfo.chatUri).await()
+                    .putFile(chatInfo.chatPhoto.toUri()).await()
                 if (!uploadTask.task.isSuccessful) {
                     trySend(
                         Response.Error(
@@ -43,6 +45,11 @@ class AddChatRepoImpl(
                 child("chat_info").setValue(chatInfoFirebase)
                     .addOnCompleteListener {
                         if (it.isSuccessful) {
+
+                            userLogins.forEach {
+                                userReference.child(it).child("chats").push().setValue(this.key!!)
+                            }
+
                             trySend(Response.Success(Unit))
                         } else trySend(
                             Response.Error(
@@ -57,7 +64,7 @@ class AddChatRepoImpl(
     }
 
     override suspend fun getAllUsers(): List<UserInfo> {
-        val result = rtdRef.child("users").get().await() //todo try to call it with no network
+        val result = rtdRef.child("users").get().await()
         val usernames = result.children.mapNotNull {
             val username = it.child("username").getValue(String::class.java)!!
             val photo = it.child("photo").getValue(String::class.java)

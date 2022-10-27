@@ -1,13 +1,16 @@
 package com.euzhene.comranet.chatRoom.presentation
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import com.euzhene.comranet.TAG_PRESENT
 import com.euzhene.comranet.chatRoom.domain.entity.ChatData
 import com.euzhene.comranet.chatRoom.domain.usecase.*
 import com.euzhene.comranet.preferences.data.PreferenceRepoImpl
@@ -21,22 +24,24 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-class ChatRoomViewModel @AssistedInject constructor(
+@HiltViewModel
+class ChatRoomViewModel @Inject constructor(
+    val stateHandle: SavedStateHandle,
     getChatDataUseCase: GetChatDataUseCase,
     private val sendChatImageUseCase: SendChatImageUseCase,
     private val sendChatMessageUseCase: SendChatMessageUseCase,
     private val observeChatDataUseCase: ObserveChatDataUseCase,
     getConfigUseCase: GetConfigUseCase,
-    setUserUseCase: SetUserUseCase,
-    @Assisted user: FirebaseUser,
+    setChatIdUseCase: SetChatIdUseCase,
+    // @Assisted chatId: String,
 ) : ViewModel() {
     val observedChatData = mutableStateListOf<ChatData>()
 
     var config by mutableStateOf(PreferenceRepoImpl.defaultConfig)
 
     init {
-        setUserUseCase(user)
+        Log.d(TAG_PRESENT, "$this: ")
+        setChatIdUseCase(stateHandle.get<String>(CHAT_ID_STATE)!!)
         observeChatData()
 
         viewModelScope.launch(Dispatchers.Main) {
@@ -46,8 +51,8 @@ class ChatRoomViewModel @AssistedInject constructor(
         }
 
     }
-    val chatDataPaging = getChatDataUseCase().cachedIn(viewModelScope)
 
+    val chatDataPaging = getChatDataUseCase().cachedIn(viewModelScope)
 
 
     fun sendImage(imgUri: Uri) {
@@ -72,6 +77,10 @@ class ChatRoomViewModel @AssistedInject constructor(
                 }
         }
 
+    }
+
+    companion object {
+        const val CHAT_ID_STATE = "chat_id"
     }
 }
 

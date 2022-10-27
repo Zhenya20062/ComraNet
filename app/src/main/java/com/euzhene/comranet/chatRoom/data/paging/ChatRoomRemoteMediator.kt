@@ -19,6 +19,7 @@ class ChatRoomRemoteMediator(
     private val query: Query,
     private val mapper: ChatRoomMapper,
     private val userId: String,
+    private val chatId: String,
 ) : RemoteMediator<Int, ChatDataDbModel>() {
     private val chatDataDao = chatRoomDatabase.chatDataDao()
     private val remoteKeysDao = chatRoomDatabase.chatRemoteKeysDao()
@@ -52,30 +53,36 @@ class ChatRoomRemoteMediator(
 
             val endOfPaginationReached = !snapshot.hasChildren()
 
-            val firebaseDataList = mutableListOf<FirebaseData>()
-            snapshot.children.forEach {
-                val firebaseData = it.getValue(FirebaseData::class.java) ?: throw RuntimeException(
+            // val firebaseDataList = mutableListOf<FirebaseData>()
+            val firebaseDataList = snapshot.children.map {
+                it.getValue(FirebaseData::class.java) ?: throw RuntimeException(
                     "Impossible to convert this data snapshot into FirebaseData"
                 )
-                firebaseDataList.add(firebaseData)
-            }
-            if (currentPage == null) firebaseDataList.removeLast()
+            }.toMutableList()
+//            snapshot.children.forEach {
+//                val firebaseData = it.getValue(FirebaseData::class.java) ?: throw RuntimeException(
+//                    "Impossible to convert this data snapshot into FirebaseData"
+//                )
+//                firebaseDataList.add(firebaseData)
+//            }
+            if (currentPage == null && firebaseDataList.isNotEmpty()) firebaseDataList.removeLast()
 
             val chatDataDbList = firebaseDataList
-                .map { mapper.mapDtoToDbModel(it, userId) }
+                .map { mapper.mapDtoToDbModel(it, userId, chatId) }
 
             val nextPage = if (endOfPaginationReached) null else chatDataDbList.first().timestamp
             val prevPage = if (currentPage == null) null else chatDataDbList.last().timestamp
             chatRoomDatabase.withTransaction {
                 if (loadType == LoadType.REFRESH) {
-                    chatDataDao.deleteAll()
-                    remoteKeysDao.deleteAll()
+                    chatDataDao.deleteAll(chatId)
+                    remoteKeysDao.deleteAll(chatId)
                 }
                 val keys = chatDataDbList.map {
                     ChatRemoteKeysDbModel(
                         it.timestamp,
                         prevPage,
                         nextPage,
+                        chatId
                     )
                 }
                 chatDataDao.insertChatDataList(chatDataDbList)
@@ -92,7 +99,7 @@ class ChatRoomRemoteMediator(
     ): ChatRemoteKeysDbModel? {
         return state.anchorPosition?.let { position ->
             state.closestItemToPosition(position)?.timestamp?.let { timestamp ->
-                remoteKeysDao.getRemoteKey(timestamp)
+                remoteKeysDao.getRemoteKey(timestamp, chatId)
             }
         }
     }
@@ -103,7 +110,7 @@ class ChatRoomRemoteMediator(
         return state.pages.firstOrNull {
             it.data.isNotEmpty()
         }?.data?.firstOrNull()?.let {
-            remoteKeysDao.getRemoteKey(it.timestamp)
+            remoteKeysDao.getRemoteKey(it.timestamp, chatId)
         }
     }
 
@@ -113,7 +120,7 @@ class ChatRoomRemoteMediator(
         return state.pages.lastOrNull {
             it.data.isNotEmpty()
         }?.data?.lastOrNull()?.let {
-            remoteKeysDao.getRemoteKey(it.timestamp)
+            remoteKeysDao.getRemoteKey(it.timestamp, chatId)
         }
     }
 }

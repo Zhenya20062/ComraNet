@@ -12,6 +12,8 @@ import com.euzhene.comranet.addChat.domain.usecase.CreateChatUseCase
 import com.euzhene.comranet.addChat.domain.usecase.GetAllUsersUseCase
 import com.euzhene.comranet.util.Response
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.scopes.ActivityScoped
+import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -22,6 +24,10 @@ class AddChatViewModel @Inject constructor(
     private val createChatUseCase: CreateChatUseCase,
     private val getAllUsersUseCase: GetAllUsersUseCase,
 ) : ViewModel() {
+    init {
+        Log.d(TAG_PRESENT, "$this: ")
+    }
+
     private val _includedUsers = mutableStateListOf<UserInfo>()
     val includedUsers: List<UserInfo> = _includedUsers
 
@@ -49,15 +55,20 @@ class AddChatViewModel @Inject constructor(
     fun addNewMember(userInfo: UserInfo) {
         _includedUsers.add(userInfo)
     }
+
     fun removeMember(userInfo: UserInfo) {
         _includedUsers.remove(userInfo)
     }
 
     fun createChat() {
         viewModelScope.launch(Dispatchers.IO) {
-            val chatInfo = ChatInfo(chatName, _includedUsers.map { it.login }, chatUri)
+            val chatInfo = ChatInfo(
+                chatName,
+                _includedUsers.map { it.login },
+                if (chatUri == null) null else chatUri.toString()
+            )
 
-            createChatUseCase(chatInfo).collectLatest {
+            createChatUseCase(chatInfo, _includedUsers.map { it.login }).collectLatest {
                 when (it) {
                     is Response.Success -> {
                         _isLoading.value = false

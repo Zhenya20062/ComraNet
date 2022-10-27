@@ -13,6 +13,5 @@ interface ChatRoomRepository {
     suspend fun sendChatMessage(message: String): Response<Boolean>
     fun observeChatData(): Flow<ChatData>
 
-    fun setUser(user: FirebaseUser)
-
+    fun setChatId(id:String)
 }

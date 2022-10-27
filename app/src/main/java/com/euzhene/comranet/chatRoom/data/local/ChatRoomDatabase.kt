@@ -9,7 +9,7 @@ import com.euzhene.comranet.chatRoom.data.local.dao.ChatRemoteKeysDao
 import com.euzhene.comranet.chatRoom.data.local.model.ChatDataDbModel
 import com.euzhene.comranet.chatRoom.data.local.model.ChatRemoteKeysDbModel
 
-@Database(entities = [ChatDataDbModel::class, ChatRemoteKeysDbModel::class], version = 3, exportSchema = false)
+@Database(entities = [ChatDataDbModel::class, ChatRemoteKeysDbModel::class], version = 5, exportSchema = false)
 abstract class ChatRoomDatabase : RoomDatabase() {
     abstract fun chatDataDao(): ChatDataDao
     abstract fun chatRemoteKeysDao(): ChatRemoteKeysDao

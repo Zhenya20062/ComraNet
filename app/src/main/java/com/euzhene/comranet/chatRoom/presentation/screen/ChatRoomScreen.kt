@@ -28,6 +28,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 fun ChatRoomScreen(
     navigator: DestinationsNavigator,
     viewModel: ChatRoomViewModel,
+    chatId:String,
    // user: FirebaseUser,
 ) {
     Scaffold(topBar = {

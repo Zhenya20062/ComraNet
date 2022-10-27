@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface PagingDataSource {
     fun getChatData(): Flow<PagingData<ChatDataDbModel>>
-    fun setUserId(id:String)
+    var chatId: String
 }

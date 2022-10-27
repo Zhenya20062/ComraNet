@@ -3,6 +3,7 @@ package com.euzhene.comranet.addChat.hilt
 import com.euzhene.comranet.addChat.data.AddChatRepoImpl
 import com.euzhene.comranet.chatImageStorage
 import com.euzhene.comranet.firebaseDatabase
+import com.euzhene.comranet.userReference
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,8 +17,8 @@ class DataModule {
 
     @ViewModelScoped
     @Provides
-    fun provideAddChatRepoImpl():AddChatRepoImpl {
+    fun provideAddChatRepoImpl(): AddChatRepoImpl {
 
-        return AddChatRepoImpl(firebaseDatabase.reference, chatImageStorage)
+        return AddChatRepoImpl(firebaseDatabase.reference, userReference, chatImageStorage)
     }
 }

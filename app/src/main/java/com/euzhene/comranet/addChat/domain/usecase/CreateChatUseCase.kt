@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class CreateChatUseCase @Inject constructor (private val repo: AddChatRepo) {
-    operator fun invoke(chatInfo: ChatInfo): Flow<Response<Unit>> {
-        return  repo.createChat(chatInfo)
+    operator fun invoke(chatInfo: ChatInfo,  userLogins:List<String>): Flow<Response<Unit>> {
+        return  repo.createChat(chatInfo, userLogins)
     }
 }

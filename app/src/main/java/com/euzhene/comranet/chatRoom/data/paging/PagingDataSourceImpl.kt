@@ -4,18 +4,21 @@ import androidx.paging.*
 import com.euzhene.comranet.chatRoom.data.local.ChatRoomDatabase
 import com.euzhene.comranet.chatRoom.data.local.model.ChatDataDbModel
 import com.euzhene.comranet.chatRoom.data.mapper.ChatRoomMapper
-import com.google.firebase.database.Query
+import com.euzhene.comranet.chatMessages
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.Flow
 
 class PagingDataSourceImpl(
-    private val queryByName: Query,
+    //private val queryByName: Query,
     private val mapper: ChatRoomMapper,
     private val chatRoomDatabase: ChatRoomDatabase,
+    private val user: FirebaseUser,
 ) : PagingDataSource {
-    private lateinit var userId:String
+    override var chatId = ""
+
     @OptIn(ExperimentalPagingApi::class)
     override fun getChatData(): Flow<PagingData<ChatDataDbModel>> {
-        val pagingSourceFactory = { chatRoomDatabase.chatDataDao().getChatDataList() }
+        val pagingSourceFactory = { chatRoomDatabase.chatDataDao().getChatDataList(chatId) }
         return Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,
@@ -25,20 +28,18 @@ class PagingDataSourceImpl(
             pagingSourceFactory = pagingSourceFactory,
             remoteMediator = ChatRoomRemoteMediator(
                 chatRoomDatabase,
-                queryByName,
+                chatMessages(chatId),
                 mapper,
-                userId,
+                user.uid,
+                chatId
             )
         ).flow
-}
-
-    override fun setUserId(id: String) {
-        userId = id
     }
 
+
     companion object {
-    const val PAGE_SIZE = 10
-    private const val INITIAL_LOAD_SIZE = PAGE_SIZE
-    private const val PREFETCH_DISTANCE = 3
-}
+        const val PAGE_SIZE = 10
+        private const val INITIAL_LOAD_SIZE = PAGE_SIZE
+        private const val PREFETCH_DISTANCE = 3
+    }
 }

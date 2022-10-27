@@ -1,14 +1,12 @@
 package com.euzhene.comranet.autorization.presentation
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.euzhene.comranet.TAG_PRESENT
 import com.euzhene.comranet.autorization.domain.entity.UserLoginData
 import com.euzhene.comranet.autorization.domain.entity.UserRegistrationData
 import com.euzhene.comranet.autorization.domain.usecase.IsSignInUseCase
@@ -17,6 +15,7 @@ import com.euzhene.comranet.autorization.domain.usecase.RegisterUserUseCase
 import com.euzhene.comranet.util.Response
 import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
