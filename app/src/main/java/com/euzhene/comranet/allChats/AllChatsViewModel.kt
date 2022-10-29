@@ -31,8 +31,8 @@ class AllChatsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-                observeChatsUseCase().collectLatest {
-                    _observedChatInfo.add(it)
+                observeChatsUseCase().collectLatest {info->
+                  _observedChatInfo.add(info)
                 }
         }
 

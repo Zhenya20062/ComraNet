@@ -116,6 +116,8 @@ fun AllChatsScreen(
                     Divider(startIndent = 10.dp, modifier = Modifier.padding(bottom = 8.dp))
                 }
                 items(observedChatInfo) {chatInfo->
+                    if (list.itemSnapshotList.items.find { chatInfo.chatId == it.chatId } != null) return@items
+
                     Row {
                         Surface(
                             modifier = Modifier.size(50.dp),

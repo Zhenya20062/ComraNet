@@ -27,11 +27,13 @@ class AllChatsRepoImpl(
     private val user: FirebaseUser,
     private val pagingDataSource: PagingDataSource,
 ) : AllChatsRepo {
+
     override fun observeChats(): Flow<ChatInfoWithId> {
         return callbackFlow {
             getMyUserRef(user.uid).child("chats").addChildEventListener(
                 object : ChildEventListener {
                     override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+
                         val chat = snapshot.getValue<ChatInfo>()!!
                         val chatWithId = ChatInfoWithId(chatId = snapshot.key!!, chatInfo = chat)
                         trySend(chatWithId)
