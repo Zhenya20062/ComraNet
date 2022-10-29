@@ -51,11 +51,9 @@ import kotlinx.coroutines.flow.collectLatest
 fun RegisterScreen(
     navigator: DestinationsNavigator,
     viewModel: AuthViewModel,
-    onGetUser: (FirebaseUser) -> Unit
 ) {
     if (viewModel.shouldGoToChatRoom.value) {
         LaunchedEffect(key1 = Unit) {
-            onGetUser(viewModel.userInfo.value!!)
             navigator.navigate(AllChatsScreenDestination()) {
                 popUpTo(RegisterScreenDestination) { inclusive = true }
             }
@@ -110,16 +108,13 @@ fun RegisterScreen(
 
 }
 
-@RootNavGraph(false)
 @Destination
 @Composable
 fun LoginScreen(
     navigator: DestinationsNavigator, viewModel: AuthViewModel,
-    onGetUser: (FirebaseUser) -> Unit
 ) {
     if (viewModel.shouldGoToChatRoom.value) {
         LaunchedEffect(key1 = Unit) {
-            onGetUser(viewModel.userInfo.value!!)
             navigator.navigate(AllChatsScreenDestination()) {
                 this.popUpTo(RegisterScreenDestination) { inclusive = true }
             }

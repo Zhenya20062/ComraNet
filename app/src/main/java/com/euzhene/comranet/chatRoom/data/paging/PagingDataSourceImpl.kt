@@ -9,7 +9,6 @@ import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.Flow
 
 class PagingDataSourceImpl(
-    //private val queryByName: Query,
     private val mapper: ChatRoomMapper,
     private val chatRoomDatabase: ChatRoomDatabase,
     private val user: FirebaseUser,

@@ -25,6 +25,7 @@ val chatImageStorage = firebaseStorageRef.child("chats_photo/")
 val userImageStorage = firebaseStorageRef.child("users_photo/")
 
 val userReference = firebaseDatabase.getReference("users")
+fun getMyUserRef(id:String) = userReference.child(id)
 
 
 //<------------VALUES FOR CONFIG------------->

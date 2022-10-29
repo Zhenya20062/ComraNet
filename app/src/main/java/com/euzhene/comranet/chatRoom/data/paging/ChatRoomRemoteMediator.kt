@@ -22,7 +22,7 @@ class ChatRoomRemoteMediator(
     private val chatId: String,
 ) : RemoteMediator<Int, ChatDataDbModel>() {
     private val chatDataDao = chatRoomDatabase.chatDataDao()
-    private val remoteKeysDao = chatRoomDatabase.chatRemoteKeysDao()
+    private val remoteKeysDao = chatRoomDatabase.chatDataRemoteKeysDao()
 
     override suspend fun load(
         loadType: LoadType,
@@ -53,18 +53,12 @@ class ChatRoomRemoteMediator(
 
             val endOfPaginationReached = !snapshot.hasChildren()
 
-            // val firebaseDataList = mutableListOf<FirebaseData>()
             val firebaseDataList = snapshot.children.map {
                 it.getValue(FirebaseData::class.java) ?: throw RuntimeException(
                     "Impossible to convert this data snapshot into FirebaseData"
                 )
             }.toMutableList()
-//            snapshot.children.forEach {
-//                val firebaseData = it.getValue(FirebaseData::class.java) ?: throw RuntimeException(
-//                    "Impossible to convert this data snapshot into FirebaseData"
-//                )
-//                firebaseDataList.add(firebaseData)
-//            }
+
             if (currentPage == null && firebaseDataList.isNotEmpty()) firebaseDataList.removeLast()
 
             val chatDataDbList = firebaseDataList

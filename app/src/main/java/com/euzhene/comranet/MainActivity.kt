@@ -5,10 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.euzhene.comranet.addChat.present.AddChatScreen
 import com.euzhene.comranet.addChat.present.AddChatViewModel
 import com.euzhene.comranet.addChat.present.SetChatInfoScreen
@@ -17,7 +15,6 @@ import com.euzhene.comranet.allChats.AllChatsViewModel
 import com.euzhene.comranet.autorization.presentation.AuthViewModel
 import com.euzhene.comranet.autorization.presentation.screen.LoginScreen
 import com.euzhene.comranet.autorization.presentation.screen.RegisterScreen
-import com.euzhene.comranet.chatRoom.hilt.ViewModelModule
 import com.euzhene.comranet.chatRoom.presentation.ChatRoomViewModel
 import com.euzhene.comranet.chatRoom.presentation.ChatRoomViewModel.Companion.CHAT_ID_STATE
 import com.euzhene.comranet.chatRoom.presentation.screen.ChatRoomScreen
@@ -28,15 +25,11 @@ import com.euzhene.comranet.preferences.presentation.PreferencesViewModel
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.manualcomposablecalls.composable
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
-
-    //@Inject
-  //  lateinit var assistedFactory: ViewModelModule.ChatRoomViewModelAssistedFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -50,20 +43,12 @@ class MainActivity : ComponentActivity() {
             DestinationsNavHost(navGraph = NavGraphs.root) {
                 composable(RegisterScreenDestination) {
                     val viewModel = hiltViewModel<AuthViewModel>()
-                    RegisterScreen(navigator = destinationsNavigator, viewModel = viewModel,
-                        onGetUser = {
-                            //user = it
-                        })
+                    RegisterScreen(navigator = destinationsNavigator, viewModel = viewModel,)
                 }
 
                 composable(LoginScreenDestination) {
                     val viewModel = hiltViewModel<AuthViewModel>()
-                    LoginScreen(
-                        navigator = destinationsNavigator,
-                        viewModel = viewModel,
-                        onGetUser = {
-                            //    user = it
-                        })
+                    LoginScreen(navigator = destinationsNavigator, viewModel = viewModel)
                 }
                 composable(AllChatsScreenDestination) {
                     val viewModel = hiltViewModel<AllChatsViewModel>()
@@ -80,13 +65,6 @@ class MainActivity : ComponentActivity() {
                 composable(ChatRoomScreenDestination) {
                     navBackStackEntry.arguments!!.putString(CHAT_ID_STATE, navArgs.chatId)
                     val viewModel = hiltViewModel<ChatRoomViewModel>()
-                    //viewModel.stateHandle[CHAT_ID_STATE] = navArgs.chatId
-//                    val viewModel: ChatRoomViewModel by viewModels {
-//                        ViewModelModule.provideFactory(
-//                            assistedFactory,
-//                            navArgs.chatId,
-//                        )
-//                    }
                     ChatRoomScreen(
                         navigator = destinationsNavigator,
                         viewModel = viewModel,
@@ -101,9 +79,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
                 composable(SendImageScreenDestination) {
-                   val d = navBackStackEntry.arguments!!.getString(CHAT_ID_STATE)
                     val viewModel = hiltViewModel<ChatRoomViewModel>()
-
                     SendImageScreen(navigator = destinationsNavigator, viewModel = viewModel)
                 }
 

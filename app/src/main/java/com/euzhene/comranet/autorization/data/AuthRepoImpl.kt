@@ -1,6 +1,5 @@
 package com.euzhene.comranet.autorization.data
 
-import android.net.Uri
 import com.euzhene.comranet.autorization.domain.entity.UserLoginData
 import com.euzhene.comranet.autorization.domain.entity.UserRegistrationData
 import com.euzhene.comranet.autorization.domain.repo.AuthRepo
@@ -56,11 +55,17 @@ class AuthRepoImpl(
     }
 
     private suspend fun loginViaLogin(data: UserLoginData): Response<FirebaseUser> {
-        userRef.child(data.login!!).get().await().apply {
-            if (!exists()) return Response.Error("Login not found")
-            val email = child("email").getValue<String>() ?: return Response.Error("Database leak")
-            return loginViaEmail(data.copy(email = email))
+        userRef.get().await().children.forEach {
+            if (it.child("login").getValue<String>() == data.login) {
+                val email = it.child("email").getValue<String>() ?: return Response.Error("Database leak")
+                return loginViaEmail(data.copy(email = email))
+            }
         }
+        return Response.Error("Login not found")
+        //    userRef.child(data.login!!).get().await().apply {
+          //  if (!exists()) return
+            //return loginViaEmail(data.copy(email = email))
+      //  }
     }
 
     private suspend fun loginViaEmail(data: UserLoginData): Response<FirebaseUser> {
@@ -71,15 +76,20 @@ class AuthRepoImpl(
     private suspend fun createUser(
         data: UserRegistrationData
     ): Response<FirebaseUser> {
-        userRef.child(data.login).apply {
-            if (get().await().exists()) return Response.Error("This login is taken")
-            child("username").setValue(data.username).await()
-            child("email").setValue(data.email).await()
+        val user = auth.createUserWithEmailAndPassword(data.email, data.password).await().user
+        updateProfile(user!!, data.username)
+        userRef.child(user.uid).apply {
+            if (get().await().exists()) {
+                user.delete().await()
+                return Response.Error("This login is taken")
+            }
+
             if (data.photoUri != null) {
                 val result =
                     storageReference.child(UUID.randomUUID().toString()).putFile(data.photoUri)
                         .await()
                 if (!result.task.isSuccessful) {
+                    user.delete().await()
                     return Response.Error(
                         result.task.exception?.localizedMessage ?: "Storage error"
                     )
@@ -87,12 +97,12 @@ class AuthRepoImpl(
                 val photoUrl = result.storage.downloadUrl.await().toString()
                 child("photo").setValue(photoUrl)
             }
-
+            child("username").setValue(data.username).await()
+            child("email").setValue(data.email).await()
+            child("login").setValue(data.login).await()
         }
-        val result = auth.createUserWithEmailAndPassword(data.email, data.password).await()
-        updateProfile(result.user!!, data.username)
-        userRef.child(data.login).child("uid").setValue(result.user!!.uid)
-        return Response.Success(result.user!!)
+
+        return Response.Success(user)
     }
 
     private suspend fun updateProfile(

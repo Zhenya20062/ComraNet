@@ -18,7 +18,7 @@ class AddChatRepoImpl(
     private val userReference: DatabaseReference,
     private val storageRef: StorageReference,
 ) : AddChatRepo {
-    override fun createChat(chatInfo: ChatInfo, userLogins:List<String>): Flow<Response<Unit>> {
+    override fun createChat(chatInfo: ChatInfo, userLogins: List<String>): Flow<Response<Unit>> {
         return callbackFlow {
             trySend(Response.Loading(Unit))
             var chatPhoto: String? = null
@@ -36,41 +36,45 @@ class AddChatRepoImpl(
             }
 
 
-            val chatInfoFirebase = ChatInfoFirebase(
+            val chatInfoFirebase = ChatInfo(
                 chatName = chatInfo.chatName,
                 members = chatInfo.members,
                 chatPhoto = chatPhoto
             )
-            rtdRef.child("chats").push().apply {
-                child("chat_info").setValue(chatInfoFirebase)
-                    .addOnCompleteListener {
-                        if (it.isSuccessful) {
+            val chatId = rtdRef.child("chats").push().key!!
+            //       child("chat_info").setValue(chatInfoFirebase)
+            // .addOnCompleteListener {
+            //    if (it.isSuccessful) {
 
-                            userLogins.forEach {
-                                userReference.child(it).child("chats").push().setValue(this.key!!)
+            userLogins.forEachIndexed { i, s ->
+                userReference.child(s).child("chats").child(chatId).setValue(chatInfoFirebase)
+                    .apply {
+                        if (i == userLogins.lastIndex) {
+                            addOnCompleteListener {
+                                if (it.isSuccessful) {
+                                    trySend(Response.Success(Unit))
+                                } else trySend(
+                                    Response.Error(
+                                        it.exception?.localizedMessage ?: "Firebase Error"
+                                    )
+                                )
                             }
-
-                            trySend(Response.Success(Unit))
-                        } else trySend(
-                            Response.Error(
-                                it.exception?.localizedMessage ?: "Firebase Error"
-                            )
-                        )
+                        }
                     }
-
             }
-            awaitClose { }
-        }
-    }
-
-    override suspend fun getAllUsers(): List<UserInfo> {
-        val result = rtdRef.child("users").get().await()
-        val usernames = result.children.mapNotNull {
-            val username = it.child("username").getValue(String::class.java)!!
-            val photo = it.child("photo").getValue(String::class.java)
-            UserInfo(username = username, login = it.key!!, photoUrl = photo)
+            awaitClose()
         }
 
-        return usernames
     }
+
+override suspend fun getAllUsers(): List<UserInfo> {
+    val result = rtdRef.child("users").get().await()
+    val usernames = result.children.mapNotNull {
+        val username = it.child("username").getValue(String::class.java)!!
+        val photo = it.child("photo").getValue(String::class.java)
+        UserInfo(username = username, login = it.key!!, photoUrl = photo)
+    }
+
+    return usernames
+}
 }
