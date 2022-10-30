@@ -122,7 +122,8 @@ class AuthViewModel @Inject constructor(
         if (username.isBlank()) {
             _toastMessage.emit("Username is empty")
         }
-
+        login = login.trim()
+        email = email.trim()
         return true
     }
 
@@ -135,6 +136,7 @@ class AuthViewModel @Inject constructor(
             _toastMessage.emit("Password is empty")
             return false
         }
+        emailOrLogin = emailOrLogin.trim()
         return true
     }
 
