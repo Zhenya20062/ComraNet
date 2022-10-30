@@ -14,7 +14,6 @@ import com.euzhene.comranet.chatRoom.domain.entity.ChatDataType
 import com.euzhene.comranet.chatRoom.domain.repository.ChatRoomRepository
 import com.euzhene.comranet.util.Response
 import com.google.firebase.auth.FirebaseUser
-import dagger.hilt.android.scopes.ActivityScoped
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -27,10 +26,6 @@ class ChatRoomRepositoryImpl @Inject constructor(
     private val mapper: ChatRoomMapper,
     private val user: FirebaseUser,
 ) : ChatRoomRepository {
-    init {
-        Log.d(TAG_DATA, user.displayName.toString())
-    }
-
 
     override fun getChatData(): Flow<PagingData<ChatData>> {
         return pagingDataSource.getChatData().map {
@@ -52,7 +47,7 @@ class ChatRoomRepositoryImpl @Inject constructor(
         pagingDataSource.chatId = id
     }
 
-    override suspend fun sendChatImage(imageUri: Uri): Response<Boolean> {
+    override suspend fun sendChatImage(imageUri: Uri): Flow<Response<Unit>> {
         val firebaseSendData = FirebaseSendData(
             senderUsername = user.displayName!!,
             senderId = user.uid,
@@ -62,7 +57,7 @@ class ChatRoomRepositoryImpl @Inject constructor(
         return remoteDatabase.addFirebaseData(firebaseSendData)
     }
 
-    override suspend fun sendChatMessage(message: String): Response<Boolean> {
+    override suspend fun sendChatMessage(message: String): Flow<Response<Unit>> {
         val firebaseSendData = FirebaseSendData(
             senderUsername = user.displayName!!,
             senderId = user.uid,

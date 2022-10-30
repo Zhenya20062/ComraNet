@@ -1,24 +1,21 @@
 package com.euzhene.comranet.chatRoom.presentation.screen
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import com.euzhene.comranet.TAG_PRESENT
 import com.euzhene.comranet.chatRoom.presentation.ChatRoomViewModel
 import com.euzhene.comranet.chatRoom.presentation.ChatRoomViewModel.Companion.CHAT_ID_STATE
 import com.euzhene.comranet.chatRoom.presentation.component.ChatInput
 import com.euzhene.comranet.chatRoom.presentation.component.Conversation
-import com.euzhene.comranet.chatRoom.presentation.component.InputSelector
 import com.euzhene.comranet.destinations.PreferenceScreenDestination
 import com.euzhene.comranet.destinations.SendImageScreenDestination
 import com.euzhene.comranet.destinations.WatchImageScreenDestination
-import com.google.firebase.auth.FirebaseUser
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -47,7 +44,18 @@ fun ChatRoomScreen(
 
             },
         )
-    }) {
+    }, snackbarHost = {
+        with (viewModel.chatError.value) {
+            LaunchedEffect(key1 = this) {
+                if (this@with.isNotBlank()) {
+                    it.showSnackbar(this@with)
+                }
+            }
+        }
+
+
+    }
+    ) {
         Box(Modifier.padding(it)) {
             ChatRoom(viewModel = viewModel, navigator)
         }

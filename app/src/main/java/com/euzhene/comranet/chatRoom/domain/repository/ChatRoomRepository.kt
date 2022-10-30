@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface ChatRoomRepository {
     fun getChatData(): Flow<PagingData<ChatData>>
-    suspend fun sendChatImage(imageUri: Uri): Response<Boolean>
-    suspend fun sendChatMessage(message: String): Response<Boolean>
+    suspend fun sendChatImage(imageUri: Uri): Flow<Response<Unit>>
+    suspend fun sendChatMessage(message: String): Flow<Response<Unit>>
     fun observeChatData(): Flow<ChatData>
 
     fun setChatId(id:String)

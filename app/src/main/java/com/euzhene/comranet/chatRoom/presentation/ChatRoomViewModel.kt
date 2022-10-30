@@ -1,23 +1,16 @@
 package com.euzhene.comranet.chatRoom.presentation
 
 import android.net.Uri
-import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
-import com.euzhene.comranet.TAG_PRESENT
 import com.euzhene.comranet.chatRoom.domain.entity.ChatData
 import com.euzhene.comranet.chatRoom.domain.usecase.*
 import com.euzhene.comranet.preferences.data.PreferenceRepoImpl
 import com.euzhene.comranet.preferences.domain.usecase.GetConfigUseCase
-import com.google.firebase.auth.FirebaseUser
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
+import com.euzhene.comranet.util.Response
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -38,8 +31,13 @@ class ChatRoomViewModel @Inject constructor(
 
     var config by mutableStateOf(PreferenceRepoImpl.defaultConfig)
 
+    private val _chatError = mutableStateOf("")
+    val chatError: State<String> = _chatError
+
+    private val _chatDataLoading = mutableStateOf(false)
+    val chatDataLoading:State<Boolean> = _chatDataLoading
+
     init {
-        Log.d(TAG_PRESENT, "$this: ")
         setChatIdUseCase(stateHandle.get<String>(CHAT_ID_STATE)!!)
         observeChatData()
 
@@ -56,15 +54,32 @@ class ChatRoomViewModel @Inject constructor(
 
     fun sendImage(imgUri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
-            val response = sendChatImageUseCase(imgUri)
+            sendChatImageUseCase(imgUri).collectLatest {
+                handleChatDataState(it)
+            }
         }
     }
-
+    private fun handleChatDataState(res:Response<Unit>) {
+        when (res) {
+            is Response.Loading -> {
+                _chatDataLoading.value = true
+            }
+            is Response.Error-> {
+                _chatDataLoading.value = false
+                _chatError.value = res.error!!
+            }
+            is Response.Success-> {
+                _chatDataLoading.value = false
+            }
+        }
+    }
     fun sendMessage(message: String) {
         viewModelScope.launch(Dispatchers.IO) {
             if (message.isBlank()) return@launch
 
-            val response = sendChatMessageUseCase(message.trim())
+            sendChatMessageUseCase(message.trim()).collectLatest {
+                handleChatDataState(it)
+            }
         }
     }
 
