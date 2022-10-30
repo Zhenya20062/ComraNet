@@ -3,6 +3,7 @@ package com.euzhene.comranet.chatRoom.presentation.screen
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,7 +17,12 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.euzhene.comranet.chatRoom.presentation.ChatRoomViewModel
@@ -41,11 +47,39 @@ fun WatchImageScreen(
             }
         }, backgroundColor = Color.Black)
     }) {
-        Box(Modifier.padding(it)) {
+        var scale by remember { mutableStateOf(1f) }
+        var offsetX by remember { mutableStateOf(0f) }
+        var offsetY by remember { mutableStateOf(0f) }
+
+        Box(
+            Modifier
+                .padding(it)
+                .clip(RectangleShape)
+                .pointerInput(Unit) {
+                    detectTransformGestures { centroid, pan, zoom, rotation ->
+                        scale *= zoom
+                        val maxX = (size.width * (scale - 1)) / 2
+                        val minX = -maxX
+                        offsetX = maxOf(minX, minOf(maxX, offsetX + pan.x))
+                        val maxY = (size.height * (scale - 1)) / 2
+                        val minY = -maxY
+                        offsetY = maxOf(minY, minOf(maxY, offsetY + pan.y))
+
+                    }
+                }
+        ) {
             AsyncImage(
                 model = url,
                 contentDescription = "Clicked image",
                 modifier = Modifier.fillMaxSize()
+                    .align(Alignment.Center)
+                    .graphicsLayer {
+                        scaleX = maxOf(.5f, minOf(3f, scale))
+                        scaleY = maxOf(.5f, minOf(3f, scale))
+
+                        translationX = offsetX
+                        translationY = offsetY
+                    }
             )
         }
     }
@@ -56,8 +90,8 @@ fun WatchImageScreen(
 fun SendImageScreen(
     navigator: DestinationsNavigator,
     viewModel: ChatRoomViewModel,
-    chatId:String,
-    ) {
+    chatId: String,
+) {
     Scaffold(topBar = {
         TopAppBar(title = {}, navigationIcon = {
             IconButton(onClick = { navigator.popBackStack() }) {
@@ -85,7 +119,7 @@ fun SendImageScreen(
 @Composable
 fun ImageSelector(
     onSendImage: (Uri) -> Unit,
-    onDismiss:()->Unit,
+    onDismiss: () -> Unit,
 ) {
     var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
