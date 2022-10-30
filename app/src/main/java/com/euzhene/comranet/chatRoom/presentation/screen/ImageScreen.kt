@@ -56,7 +56,8 @@ fun WatchImageScreen(
 fun SendImageScreen(
     navigator: DestinationsNavigator,
     viewModel: ChatRoomViewModel,
-) {
+    chatId:String,
+    ) {
     Scaffold(topBar = {
         TopAppBar(title = {}, navigationIcon = {
             IconButton(onClick = { navigator.popBackStack() }) {
@@ -73,6 +74,8 @@ fun SendImageScreen(
             ImageSelector(onSendImage = {
                 viewModel.sendImage(it)
                 navigator.popBackStack()
+            }, onDismiss = {
+                navigator.popBackStack()
             })
         }
     }
@@ -82,11 +85,15 @@ fun SendImageScreen(
 @Composable
 fun ImageSelector(
     onSendImage: (Uri) -> Unit,
+    onDismiss:()->Unit,
 ) {
     var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
     val launcher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) {
+            if (it == null) {
+                onDismiss()
+            }
             imageUri = it
         }
     LaunchedEffect(key1 = launcher) {

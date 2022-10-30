@@ -32,7 +32,6 @@ class PagingDataSourceImpl(
                 roomDatabase,
                 userReference.child(user.uid).child("chats"),
                 mapper,
-                user.uid,
             )
         ).flow
     }

@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.euzhene.comranet.TAG_PRESENT
 import com.euzhene.comranet.chatRoom.presentation.ChatRoomViewModel
+import com.euzhene.comranet.chatRoom.presentation.ChatRoomViewModel.Companion.CHAT_ID_STATE
 import com.euzhene.comranet.chatRoom.presentation.component.ChatInput
 import com.euzhene.comranet.chatRoom.presentation.component.Conversation
 import com.euzhene.comranet.chatRoom.presentation.component.InputSelector
@@ -28,8 +29,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 fun ChatRoomScreen(
     navigator: DestinationsNavigator,
     viewModel: ChatRoomViewModel,
-    chatId:String,
-   // user: FirebaseUser,
+    chatId: String,
 ) {
     Scaffold(topBar = {
         TopAppBar(
@@ -63,13 +63,19 @@ fun ChatRoom(viewModel: ChatRoomViewModel, navigator: DestinationsNavigator) {
                 modifier = Modifier.weight(1f),
                 chatDataPaging = viewModel.chatDataPaging,
                 config = viewModel.config,
-                onImageClick = { navigator.navigate(WatchImageScreenDestination(it))}
+                onImageClick = { navigator.navigate(WatchImageScreenDestination(it)) }
             )
             ChatInput(
                 onSendMessage = viewModel::sendMessage,
                 iconSectionColor = viewModel.config.colorOfIconSection,
                 onImageSelectorClick = {
-                    navigator.navigate(SendImageScreenDestination())
+                    navigator.navigate(
+                        SendImageScreenDestination(
+                            viewModel.stateHandle.get<String>(
+                                CHAT_ID_STATE
+                            )!!
+                        )
+                    )
                 }
             )
         }

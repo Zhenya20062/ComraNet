@@ -10,9 +10,6 @@ import com.euzhene.comranet.allChats.data.local.model.ChatInfoRemoteKeysDbModel
 import com.euzhene.comranet.allChats.data.mapper.AllChatsMapper
 import com.euzhene.comranet.allChats.data.model.ChatInfoFirebase
 import com.euzhene.comranet.chatRoom.data.local.ChatRoomDatabase
-import com.euzhene.comranet.chatRoom.data.local.model.ChatDataDbModel
-import com.euzhene.comranet.chatRoom.data.local.model.ChatRemoteKeysDbModel
-import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseData
 import com.google.firebase.database.Query
 import kotlinx.coroutines.tasks.await
 
@@ -21,7 +18,6 @@ class AllChatsRemoteMediator(
     private val chatRoomDatabase: ChatRoomDatabase,
     private val query: Query,
     private val mapper: AllChatsMapper,
-    private val userId: String,
 ) : RemoteMediator<Int, ChatInfoDbModel>() {
     private val chatInfoDao = chatRoomDatabase.chatInfoDao()
     private val remoteKeysDao = chatRoomDatabase.chatInfoRemoteKeysDao()
@@ -62,8 +58,6 @@ class AllChatsRemoteMediator(
                     )
                 chatInfoWithoutChatId.copy(chatId = it.key!!)
             }.toMutableList()
-
-            // if (currentPage == null && firebaseDataList.isNotEmpty()) firebaseDataList.removeLast()
 
             val chatDataDbList = firebaseDataList
                 .map { mapper.mapDtoToDbModel(it) }

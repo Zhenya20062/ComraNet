@@ -33,7 +33,6 @@ class ChatRoomViewModel @Inject constructor(
     private val observeChatDataUseCase: ObserveChatDataUseCase,
     getConfigUseCase: GetConfigUseCase,
     setChatIdUseCase: SetChatIdUseCase,
-    // @Assisted chatId: String,
 ) : ViewModel() {
     val observedChatData = mutableStateListOf<ChatData>()
 

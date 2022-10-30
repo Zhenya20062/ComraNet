@@ -79,8 +79,9 @@ class MainActivity : ComponentActivity() {
                     )
                 }
                 composable(SendImageScreenDestination) {
+                    navBackStackEntry.arguments!!.putString(CHAT_ID_STATE, navArgs.chatId)
                     val viewModel = hiltViewModel<ChatRoomViewModel>()
-                    SendImageScreen(navigator = destinationsNavigator, viewModel = viewModel)
+                    SendImageScreen(navigator = destinationsNavigator, viewModel = viewModel, navArgs.chatId)
                 }
 
             }
