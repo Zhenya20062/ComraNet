@@ -116,33 +116,36 @@ fun AllChatsScreen(
                     Divider(startIndent = 10.dp, modifier = Modifier.padding(bottom = 8.dp))
                 }
                 items(observedChatInfo) {chatInfo->
-               //     if (list.itemSnapshotList.items.find { chatInfo.chatId == it.chatId } != null) return@items
 
-                    Row {
-                        Surface(
-                            modifier = Modifier.size(50.dp),
-                            shape = CircleShape,
-                            color = Color.LightGray
-                        ) {
-                            AsyncImage(
-                                model = chatInfo.chatInfo.chatPhoto,
-                                contentDescription = "chat photo",
-                                contentScale = ContentScale.Crop
-                            )
+                    if (list.itemSnapshotList.items.find { chatInfo.chatId == it.chatId } == null) {
+                        Row {
+                            Surface(
+                                modifier = Modifier.size(50.dp),
+                                shape = CircleShape,
+                                color = Color.LightGray
+                            ) {
+                                AsyncImage(
+                                    model = chatInfo.chatInfo.chatPhoto,
+                                    contentDescription = "chat photo",
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+
+                            Text(
+                                chatInfo.chatInfo.chatName,
+                                fontSize = 25.sp,
+                                modifier = Modifier
+                                    .clickable {
+                                        navigator.navigate(ChatRoomScreenDestination(chatInfo.chatId))
+                                    }
+                                    .fillMaxWidth())
                         }
-                        Spacer(modifier = Modifier.width(10.dp))
 
-                        Text(
-                            chatInfo.chatInfo.chatName,
-                            fontSize = 25.sp,
-                            modifier = Modifier
-                                .clickable {
-                                    navigator.navigate(ChatRoomScreenDestination(chatInfo.chatId))
-                                }
-                                .fillMaxWidth())
+                        Divider(startIndent = 10.dp, modifier = Modifier.padding(bottom = 8.dp))
                     }
 
-                    Divider(startIndent = 10.dp, modifier = Modifier.padding(bottom = 8.dp))
+
                 }
             }
         }
