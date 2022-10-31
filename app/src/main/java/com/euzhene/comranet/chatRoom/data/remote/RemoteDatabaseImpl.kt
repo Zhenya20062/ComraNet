@@ -84,7 +84,8 @@ class RemoteDatabaseImpl(
                 chatRef.child(chatId).child("messages").limitToLast(1).get()
                     .addOnCompleteListener {
                         if (it.isSuccessful) {
-                            val lastData = it.result!!.getValue<FirebaseData>()!!
+                            val lastData = it.result!!.children.first().getValue<FirebaseData>()!!
+                                .copy(messageId = it.result!!.children.first().key.toString())
                             if (lastData.messageId == firebaseData.messageId) {
                                 changeLastMessage(firebaseData, onError, onComplete)
                             }
@@ -129,7 +130,6 @@ class RemoteDatabaseImpl(
             }
     }
 
-
     override suspend fun changeFirebaseData(firebaseData: FirebaseChangeData): Flow<Response<Unit>> {
         return callbackFlow {
             trySend(Response.Loading(Unit))
@@ -143,32 +143,41 @@ class RemoteDatabaseImpl(
         }
     }
 
-    private fun updateLastMessage(firebaseData: Any, onComplete: () -> Unit, onError: () -> Unit) {
-        chatRef.child(chatId).child("messages").push().setValue(firebaseData)
-            .addOnCompleteListener {
-                if (it.isSuccessful) {
-                    chatRef.child(chatId).child("last_message")
-                        .child("last_message").apply {
-                            removeValue().addOnCompleteListener {
-                                if (it.isSuccessful) {
-                                    setValue(firebaseData).addOnCompleteListener {
+    private fun updateLastMessage(
+        firebaseData: FirebaseSendData,
+        onComplete: () -> Unit,
+        onError: () -> Unit
+    ) {
+        chatRef.child(chatId).child("messages").push()
+            .apply {
+                setValue(firebaseData)
+                    .addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            val messageId = this.key.toString()
+                            chatRef.child(chatId).child("last_message")
+                                .child("last_message").apply {
+                                    removeValue().addOnCompleteListener {
                                         if (it.isSuccessful) {
-                                            onComplete()
+                                            setValue(firebaseData.copy(messageId = messageId)).addOnCompleteListener {
+                                                if (it.isSuccessful) {
+                                                    onComplete()
+                                                } else {
+                                                    onError()
+                                                }
+                                            }
                                         } else {
                                             onError()
                                         }
+
                                     }
-                                } else {
-                                    onError()
                                 }
-
-                            }
+                        } else {
+                            onError()
                         }
-                } else {
-                    onError()
-                }
 
+                    }
             }
+
     }
 
     override fun observeNewFirebaseData(): Flow<FirebaseData> {
