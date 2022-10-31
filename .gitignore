@@ -9,5 +9,5 @@
 .cxx
 local.properties
 /app/src/main/java/com/euzhene/comranet/ApiKeys.kt
-app/google-services.json
-app/release
+/app/google-services.json
+/app/release/*
