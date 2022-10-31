@@ -10,3 +10,4 @@
 local.properties
 /app/src/main/java/com/euzhene/comranet/ApiKeys.kt
 app/google-services.json
+app/release
