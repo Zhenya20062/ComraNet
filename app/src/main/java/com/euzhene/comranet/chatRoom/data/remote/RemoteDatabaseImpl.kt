@@ -37,45 +37,37 @@ class RemoteDatabaseImpl(
 
                                         val newFirebaseData =
                                             firebaseData.copy(data = it.result.toString())
-//                                        chatRef.child(chatId).child("messages").push()
-//                                            .setValue(newFirebaseData).addOnCompleteListener { }
 
                                         updateLastMessage(newFirebaseData, onComplete = {
                                             trySend(Response.Success(Unit))
                                         }, onError = {
-                                            trySend(Response.Error("Image wasn't delivered"))
+                                            trySend(Response.Error("Image wasn't sent"))
                                         })
-//                                        chatRef.child(chatId).child("last_message")
-//                                            .child("last_message").removeValue()
-//                                            .addOnCompleteListener { }
-//                                        chatRef.child(chatId).child("last_message")
-//                                            .child("last_message").setValue(newFirebaseData)
-//                                            .addOnCompleteListener { }
                                     } else {
-                                        trySend(Response.Error("Image wasn't delivered"))
+                                        trySend(Response.Error("Image wasn't sent"))
                                     }
                                 }
                             } else {
-                                trySend(Response.Error("Image wasn't delivered"))
+                                trySend(Response.Error("Image wasn't sent"))
                             }
                         }
 
                 }
                 ChatDataType.MESSAGE -> {
-//                    chatRef.child(chatId).child("messages").push().setValue(firebaseData)
-//                        .addOnCompleteListener { }
                     updateLastMessage(firebaseData, onComplete = {
                         trySend(Response.Success(Unit))
                     }, onError = {
-                        trySend(Response.Error("Message wasn't delivered"))
+                        trySend(Response.Error("Message wasn't sent"))
                     })
-//                    chatRef.child(chatId).child("last_message").child("last_message").removeValue()
-//                        .await()
-//                    chatRef.child(chatId).child("last_message").child("last_message")
-//                        .setValue(firebaseData)
-//                        .addOnCompleteListener { }
-                    //   Response.Success(true)
                 }
+                ChatDataType.POLL -> {
+                    updateLastMessage(firebaseData, onComplete = {
+                        trySend(Response.Success(Unit))
+                    }, onError = {
+                        trySend(Response.Error("Poll wasn't sent"))
+                    })
+                }
+
             }
 
             awaitClose()

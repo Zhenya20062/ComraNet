@@ -24,9 +24,6 @@ class AddChatViewModel @Inject constructor(
     private val createChatUseCase: CreateChatUseCase,
     private val getAllUsersUseCase: GetAllUsersUseCase,
 ) : ViewModel() {
-    init {
-        Log.d(TAG_PRESENT, "$this: ")
-    }
 
     private val _includedUsers = mutableStateListOf<UserInfo>()
     val includedUsers: List<UserInfo> = _includedUsers

@@ -11,9 +11,11 @@ import com.euzhene.comranet.chatRoom.data.remote.RemoteDatabase
 import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseSendData
 import com.euzhene.comranet.chatRoom.domain.entity.ChatData
 import com.euzhene.comranet.chatRoom.domain.entity.ChatDataType
+import com.euzhene.comranet.chatRoom.domain.entity.PollData
 import com.euzhene.comranet.chatRoom.domain.repository.ChatRoomRepository
 import com.euzhene.comranet.util.Response
 import com.google.firebase.auth.FirebaseUser
+import com.google.gson.Gson
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -63,6 +65,17 @@ class ChatRoomRepositoryImpl @Inject constructor(
             senderId = user.uid,
             type = ChatDataType.MESSAGE,
             data = message,
+        )
+        return remoteDatabase.addFirebaseData(firebaseSendData)
+    }
+
+    override suspend fun sendChatPoll(pollData: PollData): Flow<Response<Unit>> {
+        val pollJson = Gson().toJson(pollData)
+        val firebaseSendData = FirebaseSendData(
+            senderUsername = user.displayName!!,
+            senderId = user.uid,
+            type = ChatDataType.MESSAGE,
+            data = pollJson,
         )
         return remoteDatabase.addFirebaseData(firebaseSendData)
     }

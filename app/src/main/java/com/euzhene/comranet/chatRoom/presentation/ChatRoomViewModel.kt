@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.euzhene.comranet.chatRoom.domain.entity.ChatData
+import com.euzhene.comranet.chatRoom.domain.entity.PollData
 import com.euzhene.comranet.chatRoom.domain.usecase.*
 import com.euzhene.comranet.preferences.data.PreferenceRepoImpl
 import com.euzhene.comranet.preferences.domain.usecase.GetConfigUseCase
@@ -23,6 +24,7 @@ class ChatRoomViewModel @Inject constructor(
     getChatDataUseCase: GetChatDataUseCase,
     private val sendChatImageUseCase: SendChatImageUseCase,
     private val sendChatMessageUseCase: SendChatMessageUseCase,
+    private val sendChatPollUseCase: SendPollUseCase,
     private val observeChatDataUseCase: ObserveChatDataUseCase,
     getConfigUseCase: GetConfigUseCase,
     setChatIdUseCase: SetChatIdUseCase,
@@ -51,7 +53,13 @@ class ChatRoomViewModel @Inject constructor(
 
     val chatDataPaging = getChatDataUseCase().cachedIn(viewModelScope)
 
-
+    fun sendPoll(pollData: PollData) {
+        viewModelScope.launch(Dispatchers.IO) {
+            sendChatPollUseCase(pollData).collectLatest {
+                handleChatDataState(it)
+            }
+        }
+    }
     fun sendImage(imgUri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
             sendChatImageUseCase(imgUri).collectLatest {
