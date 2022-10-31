@@ -20,6 +20,7 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import com.euzhene.comranet.chatRoom.domain.entity.ChatData
+import com.euzhene.comranet.chatRoom.domain.entity.PollData
 import com.euzhene.comranet.preferences.domain.entity.PreferencesConfig
 import com.euzhene.comranet.preferences.presentation.ChatBackground
 import com.euzhene.comranet.util.D_MMM_YYYY
@@ -30,11 +31,12 @@ import java.util.*
 
 @Composable
 fun Conversation(
-    newChatData: SnapshotStateList<ChatData>,
+  //  newChatData: SnapshotStateList<ChatData>,
     chatDataPaging: Flow<PagingData<ChatData>>,
     modifier: Modifier,
     config: PreferencesConfig,
     onImageClick: (String) -> Unit,
+    onPollChange:(ChatData, Int)->Unit,
 ) {
     Box(modifier = modifier) {
         ChatBackground(background = config.background, modifier = Modifier.fillMaxSize())
@@ -46,18 +48,19 @@ fun Conversation(
             reverseLayout = true,
             state = scrollState,
         ) {
-            itemsIndexed(newChatData) { i, chatData ->
-                DateDivider(
-                    chatDataList = newChatData, index = i,
-                    backgroundColor = config.colorOfDateDividerBackground,
-                    textColor = config.colorOfDateDividerText,
-                )
-                ChatDataItem(
-                    chatData = chatData,
-                    config = config,
-                    onImageClick = { onImageClick(chatData.data) }
-                )
-            }
+//            itemsIndexed(newChatData) { i, chatData ->
+//                DateDivider(
+//                    chatDataList = newChatData, index = i,
+//                    backgroundColor = config.colorOfDateDividerBackground,
+//                    textColor = config.colorOfDateDividerText,
+//                )
+//                ChatDataItem(
+//                    chatData = chatData,
+//                    config = config,
+//                    onImageClick = { onImageClick(chatData.data) },
+//                    onPollOptionClick = {onPollChange(chatData, it)}
+//                )
+//            }
             itemsIndexed(pagingData) { i, chatData ->
                 if (chatData == null) return@itemsIndexed
 
@@ -71,7 +74,11 @@ fun Conversation(
                 ChatDataItem(
                     chatData = chatData,
                     config = config,
-                    onImageClick = { onImageClick(chatData.data) }
+                    onImageClick = { onImageClick(chatData.data) },
+                    onPollOptionClick = {
+                        onPollChange(chatData, it)
+                    }
+
                 )
             }
 

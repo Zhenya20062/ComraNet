@@ -67,11 +67,12 @@ fun ChatRoom(viewModel: ChatRoomViewModel, navigator: DestinationsNavigator) {
     Box {
         Column {
             Conversation(
-                newChatData = viewModel.observedChatData,
+              //  newChatData = viewModel.observedChatData,
                 modifier = Modifier.weight(1f),
                 chatDataPaging = viewModel.chatDataPaging,
                 config = viewModel.config,
-                onImageClick = { navigator.navigate(WatchImageScreenDestination(it)) }
+                onImageClick = { navigator.navigate(WatchImageScreenDestination(it)) },
+                onPollChange = viewModel::changePoll
             )
             ChatInput(
                 onSendMessage = viewModel::sendMessage,

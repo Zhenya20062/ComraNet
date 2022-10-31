@@ -14,6 +14,9 @@ interface ChatRemoteKeysDao {
     @Insert(entity = ChatRemoteKeysDbModel::class, onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(remoteKeys: List<ChatRemoteKeysDbModel>)
 
+    @Insert(entity = ChatRemoteKeysDbModel::class, onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(remoteKey:ChatRemoteKeysDbModel)
+
     @Query("delete from chat_remote_keys where chatId=:chatId")
     suspend fun deleteAll(chatId: String)
 }

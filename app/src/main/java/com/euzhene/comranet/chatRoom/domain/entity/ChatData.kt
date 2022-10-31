@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 
 data class ChatData @Inject constructor(
+    val messageId:String,
     val timestamp: Long,
     val senderUsername: String,
     val owner: Boolean,

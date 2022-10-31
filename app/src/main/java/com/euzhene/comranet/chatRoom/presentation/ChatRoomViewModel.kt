@@ -12,6 +12,7 @@ import com.euzhene.comranet.chatRoom.domain.usecase.*
 import com.euzhene.comranet.preferences.data.PreferenceRepoImpl
 import com.euzhene.comranet.preferences.domain.usecase.GetConfigUseCase
 import com.euzhene.comranet.util.Response
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -25,11 +26,13 @@ class ChatRoomViewModel @Inject constructor(
     private val sendChatImageUseCase: SendChatImageUseCase,
     private val sendChatMessageUseCase: SendChatMessageUseCase,
     private val sendChatPollUseCase: SendPollUseCase,
-    private val observeChatDataUseCase: ObserveChatDataUseCase,
+    private val changePollUseCase: ChangePollUseCase,
+    private val observeNewChatDataUseCase: ObserveNewChatDataUseCase,
+    private val observeChangedChatDataUseCase: ObserveChangedChatDataUseCase,
     getConfigUseCase: GetConfigUseCase,
     setChatIdUseCase: SetChatIdUseCase,
 ) : ViewModel() {
-    val observedChatData = mutableStateListOf<ChatData>()
+    //val observedChatData = mutableStateListOf<ChatData>()
 
     var config by mutableStateOf(PreferenceRepoImpl.defaultConfig)
 
@@ -37,7 +40,7 @@ class ChatRoomViewModel @Inject constructor(
     val chatError: State<String> = _chatError
 
     private val _chatDataLoading = mutableStateOf(false)
-    val chatDataLoading:State<Boolean> = _chatDataLoading
+    val chatDataLoading: State<Boolean> = _chatDataLoading
 
     init {
         setChatIdUseCase(stateHandle.get<String>(CHAT_ID_STATE)!!)
@@ -60,6 +63,42 @@ class ChatRoomViewModel @Inject constructor(
             }
         }
     }
+
+    init {
+//        sendPoll(
+//            PollData(
+//                heading = "Facts and statistics",
+//                options = listOf(
+//                    Pair("1", 2), Pair("2", 3), Pair("3", 1)
+//                ),
+//                yourChoice = 0,
+//            )
+//        )
+    }
+
+    fun changePoll(chatData: ChatData, option: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val pollData = Gson().fromJson(chatData.data, PollData::class.java)
+            val changedOptions = pollData.options.toMutableList().apply {
+                val oldPair = get(option)
+                removeAt(option)
+                add(option, Pair(oldPair.first, oldPair.second + 1))
+                if (pollData.yourChoice != null) {
+                    val previousVote = get(pollData.yourChoice)
+                    this[pollData.yourChoice] = Pair(previousVote.first, previousVote.second - 1)
+                }
+            }
+            val newData = pollData.copy(
+                yourChoice = option,
+                options = changedOptions
+            )
+
+            changePollUseCase(chatData.copy(data = Gson().toJson(newData))).collectLatest {
+                handleChatDataState(it)
+            }
+        }
+    }
+
     fun sendImage(imgUri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
             sendChatImageUseCase(imgUri).collectLatest {
@@ -67,20 +106,22 @@ class ChatRoomViewModel @Inject constructor(
             }
         }
     }
-    private fun handleChatDataState(res:Response<Unit>) {
+
+    private fun handleChatDataState(res: Response<Unit>) {
         when (res) {
             is Response.Loading -> {
                 _chatDataLoading.value = true
             }
-            is Response.Error-> {
+            is Response.Error -> {
                 _chatDataLoading.value = false
                 _chatError.value = res.error!!
             }
-            is Response.Success-> {
+            is Response.Success -> {
                 _chatDataLoading.value = false
             }
         }
     }
+
     fun sendMessage(message: String) {
         viewModelScope.launch(Dispatchers.IO) {
             if (message.isBlank()) return@launch
@@ -92,13 +133,8 @@ class ChatRoomViewModel @Inject constructor(
     }
 
     private fun observeChatData() {
-        viewModelScope.launch(Dispatchers.IO) {
-            observeChatDataUseCase()
-                .collect {
-                    observedChatData.add(0, it)
-                }
-        }
-
+        observeChangedChatDataUseCase()
+        observeNewChatDataUseCase()
     }
 
     companion object {

@@ -17,7 +17,7 @@ import com.euzhene.comranet.chatRoom.data.local.model.ChatRemoteKeysDbModel
 
 @Database(
     entities = [ChatDataDbModel::class, ChatRemoteKeysDbModel::class, ChatInfoDbModel::class, ChatInfoRemoteKeysDbModel::class],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 @TypeConverters(MemberListConverter::class)

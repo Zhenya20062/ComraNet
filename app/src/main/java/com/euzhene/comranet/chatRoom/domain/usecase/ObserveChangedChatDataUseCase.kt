@@ -5,8 +5,8 @@ import com.euzhene.comranet.chatRoom.domain.repository.ChatRoomRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class ObserveChatDataUseCase @Inject constructor(private val repository: ChatRoomRepository) {
-    operator fun invoke(): Flow<ChatData> {
-        return repository.observeChatData()
+class ObserveChangedChatDataUseCase @Inject constructor(private val repo:ChatRoomRepository) {
+    operator fun invoke() {
+        return repo.observeChangedChatData()
     }
 }

@@ -12,4 +12,5 @@ data class ChatDataDbModel(
     val type:String,
     val data:String,
     val chatId:String,
+    val messageId:String,
 )

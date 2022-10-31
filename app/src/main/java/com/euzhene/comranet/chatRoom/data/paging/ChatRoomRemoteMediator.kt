@@ -54,9 +54,10 @@ class ChatRoomRemoteMediator(
             val endOfPaginationReached = !snapshot.hasChildren()
 
             val firebaseDataList = snapshot.children.map {
-                it.getValue(FirebaseData::class.java) ?: throw RuntimeException(
+                val data = it.getValue(FirebaseData::class.java) ?: throw RuntimeException(
                     "Impossible to convert this data snapshot into FirebaseData"
                 )
+                data.copy(messageId = it.key.toString())
             }.toMutableList()
 
             if (currentPage == null && firebaseDataList.isNotEmpty()) firebaseDataList.removeLast()

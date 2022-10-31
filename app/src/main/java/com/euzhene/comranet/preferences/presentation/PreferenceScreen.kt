@@ -312,6 +312,7 @@ fun FontPreferenceItem(onValueChange: (Float) -> Unit, config: PreferencesConfig
                 }
                 ChatDataItem(
                     chatData = ChatData(
+                        "",
                         1660575812,
                         "Bob Harris",
                         false,
@@ -319,10 +320,12 @@ fun FontPreferenceItem(onValueChange: (Float) -> Unit, config: PreferencesConfig
                         "Do you know what time it is?"
                     ),
                     config = config,
-                    onImageClick = {}
+                    onImageClick = {},
+                    onPollOptionClick = {}
                 )
                 ChatDataItem(
                     chatData = ChatData(
+                        "",
                         1661586812,
                         "Jackie",
                         true,
@@ -330,7 +333,8 @@ fun FontPreferenceItem(onValueChange: (Float) -> Unit, config: PreferencesConfig
                         "It's morning in Tokyo \uD83D\uDE0E"
                     ),
                     config = config,
-                    onImageClick = {}
+                    onImageClick = {},
+                    onPollOptionClick = {}
                 )
 
             }

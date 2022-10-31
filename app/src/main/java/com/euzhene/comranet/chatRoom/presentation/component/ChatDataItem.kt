@@ -6,26 +6,31 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.euzhene.comranet.chatRoom.domain.entity.ChatData
 import com.euzhene.comranet.chatRoom.domain.entity.ChatDataType
+import com.euzhene.comranet.chatRoom.domain.entity.PollData
 import com.euzhene.comranet.preferences.domain.entity.PreferencesConfig
 import com.euzhene.comranet.util.H_MM
 import com.euzhene.comranet.util.mapTimestampToDate
+import com.google.gson.Gson
 
 @Composable
 fun ChatDataItem(
     chatData: ChatData,
     config: PreferencesConfig,
-    onImageClick: () -> Unit
+    onImageClick: () -> Unit,
+    onPollOptionClick: (Int) -> Unit,
 ) {
     val backgroundColor =
         if (chatData.owner) config.colorOfReceiverMessage
@@ -57,6 +62,8 @@ fun ChatDataItem(
                     )
                 } else if (chatData.type == ChatDataType.IMAGE) {
                     Picture(url = chatData.data, onImageClick = onImageClick)
+                } else if (chatData.type == ChatDataType.POLL) {
+                    PollItem(chatData = chatData, onOptionClick = onPollOptionClick)
                 }
 
                 Date(
@@ -69,6 +76,46 @@ fun ChatDataItem(
         }
     }
 
+}
+
+@Composable
+fun PollItem(chatData: ChatData, onOptionClick: (Int) -> Unit) {
+    val pollData = Gson().fromJson(chatData.data, PollData::class.java)
+
+    Column {
+        Text(text = pollData.heading, color = Color.Black, fontSize = 22.sp)
+        pollData.options.forEachIndexed { index, pair ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                RadioButton(
+                    selected = pollData.yourChoice == index,
+                    onClick = {
+                        if (pollData.yourChoice != index)
+                            onOptionClick(index)
+                    },
+                    modifier = Modifier.size(30.dp)
+                )
+                Text(
+                    text = pair.first,
+                    fontSize = 18.sp,
+                    color = Color.Black,
+                    modifier = Modifier
+                        .weight(1f)
+                        .align(Alignment.CenterVertically)
+                )
+                Text(
+                    text = pair.second.toString(),
+                    fontSize = 14.sp,
+                    color = Color.Black,
+                    modifier = Modifier.align(Alignment.Bottom),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
 }
 
 @Composable
