@@ -27,8 +27,7 @@ class RemoteDatabaseImpl(
             trySend(Response.Loading())
             when (firebaseData.type) {
                 ChatDataType.IMAGE -> {
-                    val uri = firebaseData.data as Uri
-                    imageStorage.child(UUID.randomUUID().toString()).putFile(uri)
+                    imageStorage.child(UUID.randomUUID().toString()).putFile(Uri.parse(firebaseData.data.toString()))
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
                                 it.result!!.storage.downloadUrl.addOnCompleteListener {
