@@ -22,6 +22,7 @@ import com.euzhene.comranet.chatRoom.presentation.screen.SendImageScreen
 import com.euzhene.comranet.destinations.*
 import com.euzhene.comranet.preferences.presentation.PreferenceScreen
 import com.euzhene.comranet.preferences.presentation.PreferencesViewModel
+import com.onesignal.OneSignal
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.manualcomposablecalls.composable
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,8 +33,9 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
+        setTheme(R.style.Theme_ComraNet)
         super.onCreate(savedInstanceState)
+        OneSignal.initWithContext(this)
 
         setContent {
             val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {

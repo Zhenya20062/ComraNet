@@ -7,15 +7,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.euzhene.comranet.ONE_SIGNAL_KEY
 import com.euzhene.comranet.autorization.domain.entity.UserLoginData
 import com.euzhene.comranet.autorization.domain.entity.UserRegistrationData
 import com.euzhene.comranet.autorization.domain.usecase.IsSignInUseCase
 import com.euzhene.comranet.autorization.domain.usecase.LoginUserUseCase
 import com.euzhene.comranet.autorization.domain.usecase.RegisterUserUseCase
+import com.euzhene.comranet.autorization.domain.usecase.UpdateNotificationIdUseCase
 import com.euzhene.comranet.util.Response
 import com.google.firebase.auth.FirebaseUser
+import com.onesignal.OneSignal
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -28,6 +30,7 @@ class AuthViewModel @Inject constructor(
     private val loginUserUseCase: LoginUserUseCase,
     private val registerUserUseCase: RegisterUserUseCase,
     private val isSignInUseCase: IsSignInUseCase,
+
 ) : ViewModel() {
     var emailOrLogin by mutableStateOf("")
     var email by mutableStateOf("")
@@ -46,7 +49,9 @@ class AuthViewModel @Inject constructor(
     val shouldGoToChatRoom: State<Boolean> = _shouldGoToChatRoom
 
     private var _userInfo = mutableStateOf<FirebaseUser?>(null)
-    val userInfo: State<FirebaseUser?> = _userInfo
+
+    private var _isLoading = mutableStateOf(true)
+    val isLoading: State<Boolean> = _isLoading
 
     init {
         checkAuth()
@@ -101,10 +106,16 @@ class AuthViewModel @Inject constructor(
     }
 
     private fun checkAuth() {
-        val user = isSignInUseCase() ?: return
+        val user = isSignInUseCase()
+        if (user == null) {
+            _isLoading.value = false
+            return
+        }
 
         _userInfo.value = user
         _shouldGoToChatRoom.value = true
+
+
     }
 
     private suspend fun registerChecks(): Boolean {
@@ -144,5 +155,8 @@ class AuthViewModel @Inject constructor(
         _shouldShowDialog.value = false
         _userInfo.value = response.data
         _shouldGoToChatRoom.value = true
+
+
     }
+
 }

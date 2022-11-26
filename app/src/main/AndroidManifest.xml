@@ -11,10 +11,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ComraNet"
         android:name=".hilt.ComranetApp">
+        <meta-data android:name="com.onesignal.NotificationServiceExtension"
+            android:value="com.euzhene.comranet.service.NotificationChatDataService"/>
         <activity
             android:name="com.euzhene.comranet.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.ComraNet"
+            android:theme="@style/SplashTheme"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

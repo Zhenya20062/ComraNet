@@ -1,6 +1,7 @@
 package com.euzhene.comranet.autorization.presentation.screen
 
 import android.net.Uri
+import android.window.SplashScreen
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -33,10 +34,8 @@ import coil.compose.AsyncImage
 import com.euzhene.comranet.R
 import com.euzhene.comranet.autorization.presentation.AuthViewModel
 import com.euzhene.comranet.destinations.AllChatsScreenDestination
-import com.euzhene.comranet.destinations.ChatRoomScreenDestination
 import com.euzhene.comranet.destinations.LoginScreenDestination
 import com.euzhene.comranet.destinations.RegisterScreenDestination
-import com.google.firebase.auth.FirebaseUser
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -52,6 +51,8 @@ fun RegisterScreen(
     navigator: DestinationsNavigator,
     viewModel: AuthViewModel,
 ) {
+
+
     if (viewModel.shouldGoToChatRoom.value) {
         LaunchedEffect(key1 = Unit) {
             navigator.navigate(AllChatsScreenDestination()) {
@@ -63,6 +64,12 @@ fun RegisterScreen(
     if (viewModel.shouldShowDialog.value) {
         LoadingAlertDialog()
     }
+
+    if (viewModel.isLoading.value) {
+        SplashScreen()
+        return
+    }
+
     AuthScaffold(snackbarMessageFlow = viewModel.toastMessage) {
         AuthColumn {
             AuthTextName(title = "SIGN UP", modifier = Modifier.align(Alignment.Start))
