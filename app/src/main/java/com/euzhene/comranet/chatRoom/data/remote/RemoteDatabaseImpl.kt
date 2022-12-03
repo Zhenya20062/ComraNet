@@ -15,19 +15,23 @@ import com.google.firebase.database.ktx.getValue
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 import java.util.*
 
 class RemoteDatabaseImpl(
     private val chatRef: DatabaseReference,
+    private val userRef: DatabaseReference,
 ) : RemoteDatabase {
     override var chatId: String = ""
+    override var userId: String = ""
 
     override suspend fun addFirebaseData(firebaseData: FirebaseSendData): Flow<Response<Unit>> {
         return callbackFlow {
             trySend(Response.Loading())
             when (firebaseData.type) {
                 ChatDataType.IMAGE -> {
-                    imageStorage.child(UUID.randomUUID().toString()).putFile(Uri.parse(firebaseData.data.toString()))
+                    imageStorage.child(UUID.randomUUID().toString())
+                        .putFile(Uri.parse(firebaseData.data.toString()))
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
                                 it.result!!.storage.downloadUrl.addOnCompleteListener {
@@ -183,7 +187,12 @@ class RemoteDatabaseImpl(
         return callbackFlow {
             chatRef.child(chatId).child("last_message")
                 .addChildEventListener(object : ChildEventListener {
-                    override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
+                    override fun onChildChanged(
+                        snapshot: DataSnapshot,
+                        previousChildName: String?
+                    ) {
+                    }
+
                     override fun onChildRemoved(snapshot: DataSnapshot) {}
                     override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
                     override fun onCancelled(error: DatabaseError) {}
@@ -218,6 +227,22 @@ class RemoteDatabaseImpl(
                 })
             awaitClose()
         }
+    }
+
+    override suspend fun getUserNotificationIdList(): List<String> {
+        val chatUsers = userRef.child(userId).child("chats").child(chatId)
+            .child("members").get().await()
+        val users = chatUsers.children.map {
+            it.getValue<String>()!!
+        }
+        val notificationList = mutableListOf<String>()
+        userRef.get().await().children.forEach {
+            if (users.contains(it.key)) {
+                val notification = it.child("notification_id").value.toString()
+                notificationList.add(notification)
+            }
+        }
+        return notificationList
     }
 
 }

@@ -4,6 +4,7 @@ import androidx.annotation.Keep
 import com.euzhene.comranet.chatRoom.domain.entity.ChatDataType
 import com.google.firebase.database.ServerValue
 
+@Keep
 data class FirebaseSendData(
     val messageId:String?=null,
     val timestamp: MutableMap<String, String> = ServerValue.TIMESTAMP,

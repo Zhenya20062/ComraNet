@@ -28,7 +28,7 @@ val userReference = firebaseDatabase.getReference("users")
 fun getMyUserRef(id:String) = userReference.child(id)
 
 
-//<------------VALUES FOR CONFIG------------->
+//<------------DEFAULT VALUES FOR CONFIG------------->
 const val DATA_STORE_NAME = "settings"
 const val CONFIG_NAME = "config"
 const val FONT_SIZE_DEFAULT_VALUE = 19f
@@ -47,3 +47,6 @@ val DATE_DIVIDER_TEXT_VALUE = Color.White
 const val TAG_PRESENT = "PresentationLayer"
 const val TAG_DATA = "DataLayer"
 const val TAG_DOMAIN = "DomainLayer"
+
+//<-----------OneSignal------------>
+const val ONE_SIGNAL_KEY = oneSignalApiKey //put your app id from OneSignal here

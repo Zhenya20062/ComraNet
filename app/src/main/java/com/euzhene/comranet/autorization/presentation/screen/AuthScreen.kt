@@ -1,7 +1,6 @@
 package com.euzhene.comranet.autorization.presentation.screen
 
 import android.net.Uri
-import android.window.SplashScreen
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -51,8 +50,6 @@ fun RegisterScreen(
     navigator: DestinationsNavigator,
     viewModel: AuthViewModel,
 ) {
-
-
     if (viewModel.shouldGoToChatRoom.value) {
         LaunchedEffect(key1 = Unit) {
             navigator.navigate(AllChatsScreenDestination()) {

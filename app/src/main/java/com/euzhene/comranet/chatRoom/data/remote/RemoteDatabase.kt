@@ -8,8 +8,11 @@ import kotlinx.coroutines.flow.Flow
 
 interface RemoteDatabase {
     suspend fun addFirebaseData(firebaseData: FirebaseSendData): Flow<Response<Unit>>
-    suspend fun changeFirebaseData(firebaseData: FirebaseChangeData):Flow<Response<Unit>>
+    suspend fun changeFirebaseData(firebaseData: FirebaseChangeData): Flow<Response<Unit>>
     fun observeNewFirebaseData(): Flow<FirebaseData>
-    fun observeChangedFirebaseData():Flow<FirebaseData>
+    fun observeChangedFirebaseData(): Flow<FirebaseData>
+
+    suspend fun getUserNotificationIdList(): List<String>
     var chatId: String
+    var userId: String
 }

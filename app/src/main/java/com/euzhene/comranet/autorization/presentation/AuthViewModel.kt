@@ -30,7 +30,7 @@ class AuthViewModel @Inject constructor(
     private val loginUserUseCase: LoginUserUseCase,
     private val registerUserUseCase: RegisterUserUseCase,
     private val isSignInUseCase: IsSignInUseCase,
-
+    private val updateNotificationIdUseCase: UpdateNotificationIdUseCase,
 ) : ViewModel() {
     var emailOrLogin by mutableStateOf("")
     var email by mutableStateOf("")
@@ -113,9 +113,11 @@ class AuthViewModel @Inject constructor(
         }
 
         _userInfo.value = user
-        _shouldGoToChatRoom.value = true
 
+        initOneSignal(){
+            _shouldGoToChatRoom.value = true
 
+        }
     }
 
     private suspend fun registerChecks(): Boolean {
@@ -154,9 +156,17 @@ class AuthViewModel @Inject constructor(
     private fun onResponseSuccess(response: Response.Success<FirebaseUser>) {
         _shouldShowDialog.value = false
         _userInfo.value = response.data
-        _shouldGoToChatRoom.value = true
 
-
+        initOneSignal() {
+            _shouldGoToChatRoom.value = true
+        }
     }
 
+    private fun initOneSignal(onResult: () -> Unit) {
+        OneSignal.setAppId(ONE_SIGNAL_KEY)
+        viewModelScope.launch(Dispatchers.IO) {
+            val res = updateNotificationIdUseCase()
+            onResult()
+        }
+    }
 }

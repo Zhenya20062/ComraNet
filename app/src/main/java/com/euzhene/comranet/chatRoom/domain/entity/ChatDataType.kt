@@ -1,6 +1,10 @@
 package com.euzhene.comranet.chatRoom.domain.entity
 
+import androidx.annotation.Keep
+
 
 enum class ChatDataType {
-    IMAGE, MESSAGE,POLL,
+    @Keep IMAGE,
+    @Keep MESSAGE,
+    @Keep POLL,
 }

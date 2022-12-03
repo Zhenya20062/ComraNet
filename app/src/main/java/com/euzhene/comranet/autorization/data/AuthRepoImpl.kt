@@ -10,6 +10,7 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.storage.StorageReference
+import com.onesignal.OneSignal
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
@@ -54,18 +55,37 @@ class AuthRepoImpl(
         return auth.currentUser
     }
 
+    override suspend fun updateNotificationId(): Response<Unit> {
+        try {
+            if (auth.currentUser == null) throw RuntimeException("FirebaseUser not found")
+
+            userRef.get().await().children.forEach {
+                if (it.key == auth.currentUser!!.uid) {
+                    val deviceState = OneSignal.getDeviceState()
+                        ?: throw RuntimeException("Device state is null")
+
+                    userRef.child(it.key!!).child("notification_id").setValue(deviceState.userId)
+                        .await()
+                    return Response.Success(Unit)
+                }
+            }
+            return Response.Error("No result")
+        } catch (e: Exception) {
+            return Response.Error(e.message.toString())
+        }
+
+    }
+
+
     private suspend fun loginViaLogin(data: UserLoginData): Response<FirebaseUser> {
         userRef.get().await().children.forEach {
             if (it.child("login").getValue<String>() == data.login) {
-                val email = it.child("email").getValue<String>() ?: return Response.Error("Database leak")
+                val email =
+                    it.child("email").getValue<String>() ?: return Response.Error("Database leak")
                 return loginViaEmail(data.copy(email = email))
             }
         }
         return Response.Error("Login not found")
-        //    userRef.child(data.login!!).get().await().apply {
-          //  if (!exists()) return
-            //return loginViaEmail(data.copy(email = email))
-      //  }
     }
 
     private suspend fun loginViaEmail(data: UserLoginData): Response<FirebaseUser> {

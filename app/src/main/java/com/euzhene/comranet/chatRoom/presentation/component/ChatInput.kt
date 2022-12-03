@@ -27,16 +27,19 @@ import androidx.compose.ui.unit.sp
 import com.euzhene.comranet.R
 
 enum class InputSelector {
-    IMAGE, EMOJI, AUDIO
+    IMAGE, EMOJI, AUDIO, POLL,
 }
 
 @Composable
 fun ChatInput(
     onSendMessage: (String) -> Unit,
     onImageSelectorClick: () -> Unit,
+    onPollSelectorClick: () -> Unit,
     iconSectionColor: Color,
 ) {
     var inputText by rememberSaveable { mutableStateOf("") }
+   // var shouldShowPollSelector by rememberSaveable { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -55,10 +58,27 @@ fun ChatInput(
             }
         }
         UserInputSelector(iconSectionColor = iconSectionColor) {
-            onImageSelectorClick()
+            if (it == InputSelector.IMAGE) {
+          //      shouldShowPollSelector = false
+                onImageSelectorClick()
+            } else if (it == InputSelector.POLL) {
+                onPollSelectorClick()
+            //    shouldShowPollSelector = true
+            }
         }
     }
+}
 
+
+@Composable
+fun PollSelector() {
+    Box(
+        Modifier
+            .size(70.dp)
+            .background(Color.Black)
+    ) {
+
+    }
 }
 
 @Composable
@@ -91,6 +111,13 @@ fun UserInputSelector(
             iconSectionColor = iconSectionColor,
         ) {
             onInputSelectorChange(InputSelector.AUDIO)
+        }
+        InputSelectorBtn(
+            id = R.drawable.ic_poll,
+            contentDescription = "Poll selector",
+            iconSectionColor = iconSectionColor,
+        ) {
+            onInputSelectorChange(InputSelector.POLL)
         }
     }
 }

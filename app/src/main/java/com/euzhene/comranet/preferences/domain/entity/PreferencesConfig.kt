@@ -1,8 +1,10 @@
 package com.euzhene.comranet.preferences.domain.entity
 
+import androidx.annotation.Keep
 import androidx.compose.ui.graphics.Color
 import javax.inject.Inject
 
+@Keep
 data class PreferencesConfig @Inject constructor(
     val background: String?,
     val fontSize: Float,

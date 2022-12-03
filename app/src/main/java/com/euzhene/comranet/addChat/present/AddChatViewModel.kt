@@ -1,19 +1,15 @@
 package com.euzhene.comranet.addChat.present
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.euzhene.comranet.TAG_PRESENT
 import com.euzhene.comranet.addChat.domain.entity.ChatInfo
 import com.euzhene.comranet.addChat.domain.entity.UserInfo
 import com.euzhene.comranet.addChat.domain.usecase.CreateChatUseCase
 import com.euzhene.comranet.addChat.domain.usecase.GetAllUsersUseCase
 import com.euzhene.comranet.util.Response
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.scopes.ActivityScoped
-import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -80,9 +76,5 @@ class AddChatViewModel @Inject constructor(
             }
         }
 
-    }
-
-    init {
-        Log.d(TAG_PRESENT, "$this: ")
     }
 }

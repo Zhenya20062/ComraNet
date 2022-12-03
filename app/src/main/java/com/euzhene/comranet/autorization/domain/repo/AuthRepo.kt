@@ -10,4 +10,5 @@ interface AuthRepo {
     suspend fun registerUser(data: UserRegistrationData): Flow<Response<FirebaseUser>>
     suspend fun logInUser(data: UserLoginData): Flow<Response<FirebaseUser>>
     fun isSignIn(): FirebaseUser?
+    suspend fun updateNotificationId(): Response<Unit>
 }

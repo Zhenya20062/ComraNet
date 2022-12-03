@@ -8,6 +8,7 @@ import com.euzhene.comranet.chatRoom.data.paging.PagingDataSourceImpl
 import com.euzhene.comranet.chatRoom.data.remote.RemoteDatabase
 import com.euzhene.comranet.chatRoom.data.remote.RemoteDatabaseImpl
 import com.euzhene.comranet.firebaseChatReference
+import com.euzhene.comranet.userReference
 import com.google.firebase.auth.FirebaseUser
 import dagger.Binds
 import dagger.Module
@@ -30,7 +31,7 @@ abstract class DataModule {
         @Provides
         @ViewModelScoped
         fun provideRemoteDatabaseImpl(): RemoteDatabaseImpl {
-            return RemoteDatabaseImpl(firebaseChatReference)
+            return RemoteDatabaseImpl(firebaseChatReference, userReference)
         }
 
         @Provides

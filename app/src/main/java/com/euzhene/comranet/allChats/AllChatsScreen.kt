@@ -1,7 +1,5 @@
 package com.euzhene.comranet.allChats
 
-import android.net.NetworkRequest
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.AsyncImage
-import com.euzhene.comranet.TAG_PRESENT
 import com.euzhene.comranet.destinations.AddChatScreenDestination
 import com.euzhene.comranet.destinations.ChatRoomScreenDestination
 import com.euzhene.comranet.util.NetworkConnection
@@ -61,10 +58,10 @@ fun AllChatsScreen(
         LaunchedEffect(key1 = Unit) {
             with(NetworkConnection) {
                 onAvailable = {
-                    Log.d(TAG_PRESENT, "onAvailable: ")
+                  //  Log.d(TAG_PRESENT, "onAvailable: ")
                 }
                 onLost = {
-                    Log.d(TAG_PRESENT, "onLost: ")
+                    //Log.d(TAG_PRESENT, "onLost: ")
 
                 }
                 initNetworkStatus(context)
