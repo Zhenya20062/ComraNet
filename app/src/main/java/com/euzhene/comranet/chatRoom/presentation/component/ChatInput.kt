@@ -25,6 +25,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.euzhene.comranet.R
+import com.euzhene.comranet.preferences.domain.entity.PreferencesConfig
 
 enum class InputSelector {
     IMAGE, EMOJI, AUDIO, POLL,
@@ -35,35 +36,36 @@ fun ChatInput(
     onSendMessage: (String) -> Unit,
     onImageSelectorClick: () -> Unit,
     onPollSelectorClick: () -> Unit,
-    iconSectionColor: Color,
+    config: PreferencesConfig,
 ) {
     var inputText by rememberSaveable { mutableStateOf("") }
-   // var shouldShowPollSelector by rememberSaveable { mutableStateOf(false) }
+    // var shouldShowPollSelector by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.LightGray.copy(alpha = 0.3f))
+            .background(config.chatTheme.bottomSection)
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
             UserInputText(
                 modifier = Modifier.weight(1f),
                 textFieldValue = inputText,
                 onTextChanged = { inputText = it },
+                textColor = config.chatTheme.inputText
             )
             Spacer(modifier = Modifier.width(6.dp))
-            UserSendBtn {
+            UserSendBtn(textColor = config.chatTheme.inputText, onSendMessage = {
                 onSendMessage(inputText)
                 inputText = ""
-            }
+            })
         }
-        UserInputSelector(iconSectionColor = iconSectionColor) {
+        UserInputSelector(iconSectionColor = config.chatTheme.iconSection) {
             if (it == InputSelector.IMAGE) {
-          //      shouldShowPollSelector = false
+                //      shouldShowPollSelector = false
                 onImageSelectorClick()
             } else if (it == InputSelector.POLL) {
                 onPollSelectorClick()
-            //    shouldShowPollSelector = true
+                //    shouldShowPollSelector = true
             }
         }
     }
@@ -147,7 +149,8 @@ fun InputSelectorBtn(
 fun UserInputText(
     modifier: Modifier,
     textFieldValue: String,
-    onTextChanged: (String) -> Unit
+    onTextChanged: (String) -> Unit,
+    textColor: Color,
 ) {
     OutlinedTextField(
         value = textFieldValue,
@@ -162,15 +165,15 @@ fun UserInputText(
         ),
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         textStyle = TextStyle(
-            fontSize = 19.sp,
+            fontSize = 19.sp, color = textColor
         ),
-        placeholder = { Text("Enter a message") },
+        placeholder = { Text("Enter a message", color = textColor) },
         shape = RoundedCornerShape(60.dp)
     )
 }
 
 @Composable
-fun UserSendBtn(onSendMessage: () -> Unit) {
+fun UserSendBtn(onSendMessage: () -> Unit, textColor: Color) {
     Button(
         onClick = onSendMessage,
         elevation = ButtonDefaults.elevation(0.dp),
@@ -182,6 +185,6 @@ fun UserSendBtn(onSendMessage: () -> Unit) {
         ),
         modifier = Modifier.padding(4.dp)
     ) {
-        Text("Send")
+        Text("Send", color = textColor)
     }
 }

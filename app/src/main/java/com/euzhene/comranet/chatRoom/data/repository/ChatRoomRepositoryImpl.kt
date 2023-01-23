@@ -1,13 +1,17 @@
 package com.euzhene.comranet.chatRoom.data.repository
 
 import android.net.Uri
+import android.util.Log
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.euzhene.comranet.chatRoom.data.local.ChatRoomDatabase
+import androidx.room.withTransaction
+import com.euzhene.comranet.TAG_DATA
+import com.euzhene.comranet.addChat.domain.entity.ChatInfo
+import com.euzhene.comranet.chatRoom.data.local.ComranetRoomDatabase
 import com.euzhene.comranet.chatRoom.data.mapper.ChatRoomMapper
 import com.euzhene.comranet.chatRoom.data.paging.PagingDataSource
-import com.euzhene.comranet.chatRoom.data.remote.RemoteDatabase
-import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseSendData
+import com.euzhene.comranet.chatRoom.data.remote.RemoteDatabaseFirestore
+import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseSendDataModel
 import com.euzhene.comranet.chatRoom.domain.entity.ChatData
 import com.euzhene.comranet.chatRoom.domain.entity.ChatDataType
 import com.euzhene.comranet.chatRoom.domain.entity.PollData
@@ -17,24 +21,25 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.gson.Gson
 import com.onesignal.OneSignal
 import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import org.json.JSONObject
 import javax.inject.Inject
 
 @ViewModelScoped
 class ChatRoomRepositoryImpl @Inject constructor(
     private val pagingDataSource: PagingDataSource,
-    private val remoteDatabase: RemoteDatabase,
-    private val roomDatabase: ChatRoomDatabase,
+    private val remoteDatabase: RemoteDatabaseFirestore,
+    private val roomDatabase: ComranetRoomDatabase,
     private val mapper: ChatRoomMapper,
     private val user: FirebaseUser,
 ) : ChatRoomRepository {
     private lateinit var chatId: String
+
+    override fun getGroupInfo(): Flow<Result<ChatInfo>> {
+        return remoteDatabase.getChatInfo()
+    }
 
     override fun getChatData(): Flow<PagingData<ChatData>> {
         return pagingDataSource.getChatData().map {
@@ -45,34 +50,34 @@ class ChatRoomRepositoryImpl @Inject constructor(
 
     }
 
-    override fun observeNewChatData() {
-        CoroutineScope(Dispatchers.IO).launch {
-            remoteDatabase.observeNewFirebaseData().map {
-                mapper.mapDtoToDbModel(it, user.uid, chatId)
-            }.collectLatest {
+    override suspend fun observeNewChatData() {
+        remoteDatabase.observeNewFirebaseData().map {
+            mapper.mapDtoToDbModel(it)
+        }.collectLatest {
+            Log.d(TAG_DATA, "observeNewChatData: $it")
+            roomDatabase.withTransaction {
+                roomDatabase.chatDataDao().insertChatData(it)
                 val chatModel = roomDatabase.chatDataDao().getChatDataByMessageId(it.messageId)
                 if (chatModel == null) {
                     roomDatabase.chatDataDao().insertChatData(it)
-
                 } else {
                     roomDatabase.chatDataDao().updateChatData(it.data, it.messageId)
                 }
             }
+
         }
     }
 
-    override fun observeChangedChatData() {
-        CoroutineScope(Dispatchers.IO).launch {
-            remoteDatabase.observeChangedFirebaseData().collectLatest {
-                roomDatabase.chatDataDao().updateChatData(it.data, it.messageId)
-            }
+    override suspend fun observeChangedChatData() {
+        remoteDatabase.observeChangedFirebaseData().collectLatest {
+            roomDatabase.chatDataDao().updateChatData(it.data, it.message_id)
         }
     }
 
     override fun setChatId(id: String) {
         chatId = id
         remoteDatabase.chatId = id
-        remoteDatabase.userId = user.uid
+        //  remoteDatabase.userId = user.uid
         pagingDataSource.chatId = id
     }
 
@@ -81,8 +86,9 @@ class ChatRoomRepositoryImpl @Inject constructor(
         val firebaseSendData = mapper.mapEntityToDto(
             type = ChatDataType.IMAGE,
             data = imageUri.toString(),
-            user = user
+            chatId = chatId,
         )
+        sendNotification(firebaseSendData)
         return remoteDatabase.addFirebaseData(firebaseSendData)
     }
 
@@ -91,7 +97,7 @@ class ChatRoomRepositoryImpl @Inject constructor(
         val firebaseSendData = mapper.mapEntityToDto(
             type = ChatDataType.MESSAGE,
             data = message,
-            user = user
+            chatId = chatId,
         )
         sendNotification(firebaseSendData)
         return remoteDatabase.addFirebaseData(firebaseSendData)
@@ -103,7 +109,7 @@ class ChatRoomRepositoryImpl @Inject constructor(
         val firebaseSendData = mapper.mapEntityToDto(
             type = ChatDataType.POLL,
             data = pollJson,
-            user = user
+            chatId = chatId,
         )
         return remoteDatabase.addFirebaseData(firebaseSendData)
     }
@@ -113,12 +119,18 @@ class ChatRoomRepositoryImpl @Inject constructor(
         return remoteDatabase.changeFirebaseData(firebaseChangeData)
     }
 
-    private suspend fun sendNotification(firebaseSendData: FirebaseSendData) {
+    private suspend fun sendNotification(firebaseSendData: FirebaseSendDataModel) {
         val notificationList = remoteDatabase.getUserNotificationIdList().toMutableList().apply {
             this.remove(OneSignal.getDeviceState()!!.userId)
         }
-        val body =
-            "{\"include_player_ids\":[\"${notificationList.joinToString()}\"],\"contents\":{\"en\":\"${firebaseSendData.data}\"},\"name\":\"euzhene\",\"app_id\":\"de989c51-3919-4fad-969a-fcedaf46bf86\"}"
+
+
+        val body = if (firebaseSendData.type == ChatDataType.MESSAGE)
+            "{\"include_player_ids\":[\"${notificationList.joinToString("\",\"")}\"],\"contents\":{\"en\":\"${firebaseSendData.data}\"},\"name\":\"euzhene\",\"app_id\":\"de989c51-3919-4fad-969a-fcedaf46bf86\"}"
+        else {
+            //for image
+            "{\"include_player_ids\":[\"${notificationList.joinToString("\",\"")}\"],\"contents\":{\"en\":\"Image\"},\"name\":\"euzhene\",\"app_id\":\"de989c51-3919-4fad-969a-fcedaf46bf86\",\"big_picture\":\"${firebaseSendData.data}\"}"
+        }
 
         OneSignal.postNotification(
             body,

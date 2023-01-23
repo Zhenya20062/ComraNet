@@ -50,8 +50,8 @@ class AuthViewModel @Inject constructor(
 
     private var _userInfo = mutableStateOf<FirebaseUser?>(null)
 
-    private var _isLoading = mutableStateOf(true)
-    val isLoading: State<Boolean> = _isLoading
+    private var _hasUserData = mutableStateOf(true)
+    val hasUserData: State<Boolean> = _hasUserData
 
     init {
         checkAuth()
@@ -108,15 +108,14 @@ class AuthViewModel @Inject constructor(
     private fun checkAuth() {
         val user = isSignInUseCase()
         if (user == null) {
-            _isLoading.value = false
+            _hasUserData.value = false
             return
         }
 
         _userInfo.value = user
 
-        initOneSignal(){
+        initOneSignal {
             _shouldGoToChatRoom.value = true
-
         }
     }
 
@@ -157,7 +156,7 @@ class AuthViewModel @Inject constructor(
         _shouldShowDialog.value = false
         _userInfo.value = response.data
 
-        initOneSignal() {
+        initOneSignal {
             _shouldGoToChatRoom.value = true
         }
     }
@@ -166,6 +165,9 @@ class AuthViewModel @Inject constructor(
         OneSignal.setAppId(ONE_SIGNAL_KEY)
         viewModelScope.launch(Dispatchers.IO) {
             val res = updateNotificationIdUseCase()
+            if (res is Response.Error) {
+                _toastMessage.emit(res.error.toString())
+            }
             onResult()
         }
     }

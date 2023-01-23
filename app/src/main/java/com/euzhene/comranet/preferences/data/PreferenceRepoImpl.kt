@@ -2,14 +2,17 @@ package com.euzhene.comranet.preferences.data
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.euzhene.comranet.*
+import com.euzhene.comranet.chatRoom.presentation.theme.defaultTheme
 import com.euzhene.comranet.preferences.domain.entity.PreferencesConfig
 import com.euzhene.comranet.preferences.domain.repository.PreferenceRepo
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -39,18 +42,11 @@ class PreferenceRepoImpl @Inject constructor(
     }
 
     companion object {
+        const val DATA_STORE_NAME = "settings"
+        const val CONFIG_NAME = "config"
+        private const val FONT_SIZE_DEFAULT_VALUE = 19f
         val defaultConfig = PreferencesConfig(
-            background = null,
-            fontSize = FONT_SIZE_DEFAULT_VALUE,
-            colorOfReceiverMessage = RECEIVER_MESSAGE_VALUE,
-            colorOfSenderMessage = SENDER_MESSAGE_VALUE,
-            colorOfAppBar = APP_BAR_VALUE,
-            colorOfIconSection = ICON_SECTION_VALUE,
-            colorOfMessageUsername = MESSAGE_USERNAME_VALUE,
-            colorOfMessageText = MESSAGE_TEXT_VALUE,
-            colorOfMessageDate = MESSAGE_DATE_VALUE,
-            colorOfDateDividerBackground = DATE_DIVIDER_BACKGROUND_VALUE,
-            colorOfDateDividerText = DATE_DIVIDER_TEXT_VALUE,
+            null, FONT_SIZE_DEFAULT_VALUE, defaultTheme
         )
     }
 }

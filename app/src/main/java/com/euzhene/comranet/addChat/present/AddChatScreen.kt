@@ -95,7 +95,7 @@ fun ListOfUsers(viewModel: AddChatViewModel) {
                     color = Color.LightGray
                 ) {
                     AsyncImage(
-                        model = userInfo.photoUrl,
+                        model = userInfo.photo_url,
                         contentDescription = "user photo",
                         contentScale = ContentScale.Crop
                     )

@@ -1,9 +1,7 @@
 package com.euzhene.comranet.addChat.hilt
 
+import com.euzhene.comranet.*
 import com.euzhene.comranet.addChat.data.AddChatRepoImpl
-import com.euzhene.comranet.chatImageStorage
-import com.euzhene.comranet.firebaseDatabase
-import com.euzhene.comranet.userReference
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,6 +17,11 @@ class DataModule {
     @Provides
     fun provideAddChatRepoImpl(): AddChatRepoImpl {
 
-        return AddChatRepoImpl(firebaseDatabase.reference, userReference, chatImageStorage)
+        return AddChatRepoImpl(
+            userFirestoreRef = usersFirestore(),
+            chatInfoFirestoreRef = chatInfoFirestore(),
+            chatMembersFirestoreRef = chatMembersFirestore(),
+            storageRef = chatImageStorage
+        )
     }
 }

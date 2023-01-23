@@ -13,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,7 +42,24 @@ class AddChatViewModel @Inject constructor(
 
     fun getAllUsers() {
         viewModelScope.launch(Dispatchers.IO) {
-            _allUsers.value = getAllUsersUseCase()
+            getAllUsersUseCase().collectLatest {
+                when (it) {
+                    is Response.Success -> {
+                        _allUsers.value = it.data!!
+                        _isLoading.value = false
+                    }
+                    is Response.Error -> {
+                        _error.value = it.error!!
+                        _isLoading.value = false
+                    }
+                    is Response.Loading -> {
+                        _isLoading.value = true
+                    }
+
+                }
+            }
+
+            //_allUsers.value = getAllUsersUseCase()
         }
     }
 
@@ -56,6 +74,7 @@ class AddChatViewModel @Inject constructor(
     fun createChat() {
         viewModelScope.launch(Dispatchers.IO) {
             val chatInfo = ChatInfo(
+                chat_id = UUID.randomUUID().toString(),
                 chatName,
                 _includedUsers.map { it.login },
                 if (chatUri == null) null else chatUri.toString()

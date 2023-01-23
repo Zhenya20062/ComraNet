@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class ObserveNewChatDataUseCase @Inject constructor(private val repository: ChatRoomRepository) {
-    operator fun invoke() {
+    suspend operator fun invoke() {
         return repository.observeNewChatData()
     }
 }

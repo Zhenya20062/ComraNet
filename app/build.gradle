@@ -10,9 +10,17 @@ plugins {
 android {
     compileSdk 33
 
+    applicationVariants.all { variant ->
+        kotlin.sourceSets {
+            getByName(variant.name) {
+                kotlin.srcDir("build/generated/ksp/${variant.name}/kotlin")
+            }
+        }
+    }
+
     defaultConfig {
         applicationId "com.euzhene.comranet"
-        minSdk 23
+        minSdk 25
         targetSdk 33
         versionCode 1
         versionName "0.6.0"
@@ -24,11 +32,13 @@ android {
     }
 
     signingConfigs {
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
         release {
-            keyAlias 'key0'
-            keyPassword 'v26v2949'
-            storeFile file('C:\\Users\\Euzhene\\Desktop\\Docs\\keyStoreForComranet.jks')
-            storePassword 'v26v2949'
+            keyAlias properties.getProperty('keyAlias')
+            keyPassword properties.getProperty('keyPassword')
+            storeFile file(properties.getProperty('storeFile'))
+            storePassword properties.getProperty('storePassword')
         }
     }
 
@@ -79,18 +89,21 @@ dependencies {
     implementation 'androidx.activity:activity-compose:1.6.1'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
+
     //navigation
-    implementation 'io.github.raamcosta.compose-destinations:core:1.6.13-beta'
-    ksp 'io.github.raamcosta.compose-destinations:ksp:1.6.13-beta'
+    implementation 'io.github.raamcosta.compose-destinations:core:1.6.27-beta'
+    ksp 'io.github.raamcosta.compose-destinations:ksp:1.6.27-beta'
+    implementation 'io.github.raamcosta.compose-destinations:animations-core:1.6.27-beta'
 
     //<-----------------firebase-------------------->
-    //realtime database
     implementation platform('com.google.firebase:firebase-bom:29.1.0')
+    //storage
     implementation 'com.google.firebase:firebase-database-ktx'
+    implementation 'com.google.firebase:firebase-storage-ktx'
+    implementation 'com.google.firebase:firebase-firestore-ktx'
     //authentication
     implementation 'com.firebaseui:firebase-ui-auth:7.2.0'
-    //storage
-    implementation 'com.google.firebase:firebase-storage-ktx'
+
 
     //<-----------------coroutines-------------------->
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
@@ -103,7 +116,7 @@ dependencies {
     implementation("androidx.paging:paging-compose:1.0.0-alpha17")
 
     //<-----------------room-------------------->
-    def room_version = "2.5.0-beta01"
+    def room_version = "2.5.0"
     implementation "androidx.room:room-runtime:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
@@ -127,6 +140,13 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.9.0'
     //onesignal(notifications)
     implementation 'com.onesignal:OneSignal:[4.0.0, 4.99.99]'
+
+    //accompanist
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.28.0"
+
+    //splash screen
+    implementation 'androidx.core:core-splashscreen:1.0.0'
+
 }
 kapt {
     correctErrorTypes = true

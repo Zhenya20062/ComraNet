@@ -1,37 +1,31 @@
 package com.euzhene.comranet.chatRoom.presentation.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.*
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.euzhene.comranet.chatRoom.presentation.ChatRoomViewModel
-import com.euzhene.comranet.chatRoom.presentation.ChatRoomViewModel.Companion.CHAT_ID_STATE
 import com.euzhene.comranet.chatRoom.presentation.component.ChatInput
 import com.euzhene.comranet.chatRoom.presentation.component.Conversation
 import com.euzhene.comranet.chatRoom.presentation.component.PollSelector
-import com.euzhene.comranet.destinations.PreferenceScreenDestination
 import com.euzhene.comranet.destinations.SendImageScreenDestination
 import com.euzhene.comranet.destinations.WatchImageScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
-@RootNavGraph(false)
-@Destination
 @Composable
+@Destination
 fun ChatRoomScreen(
     navigator: DestinationsNavigator,
     viewModel: ChatRoomViewModel,
@@ -45,23 +39,20 @@ fun ChatRoomScreen(
         sheetPeekHeight = 0.dp,
         topBar = {
             TopAppBar(
-                backgroundColor = viewModel.config.colorOfAppBar,
-                title = { Text("") },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        navigator.navigate(PreferenceScreenDestination())
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "settings icon"
-                        )
-                    }
-
+                backgroundColor = viewModel.config.chatTheme.appbarBackground,
+                content = {
+                    ChatRoomAppBar(
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(vertical = 4.dp),
+                        groupInfo = viewModel.groupInfo.value,
+                        config =viewModel.config
+                    )
                 },
             )
         },
         snackbarHost = {
-            with(viewModel.chatError.value) {
+            with(viewModel.errorMessage.value) {
                 LaunchedEffect(key1 = this) {
                     if (this@with.isNotBlank()) {
                         it.showSnackbar(this@with)
@@ -71,6 +62,7 @@ fun ChatRoomScreen(
 
 
         }, sheetContent = {
+            return@BottomSheetScaffold
             PollSelector()
         }
     ) {
@@ -101,14 +93,10 @@ fun ChatRoom(
             )
             ChatInput(
                 onSendMessage = viewModel::sendMessage,
-                iconSectionColor = viewModel.config.colorOfIconSection,
+                config = viewModel.config,
                 onImageSelectorClick = {
                     navigator.navigate(
-                        SendImageScreenDestination(
-                            viewModel.stateHandle.get<String>(
-                                CHAT_ID_STATE
-                            )!!
-                        )
+                        SendImageScreenDestination(viewModel.chatId)
                     )
                 },
                 onPollSelectorClick = onPollSelectorClick

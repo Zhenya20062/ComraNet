@@ -2,6 +2,7 @@ package com.euzhene.comranet.chatRoom.data.local.model
 
 import androidx.annotation.Keep
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
 @Keep
@@ -13,3 +14,4 @@ data class ChatRemoteKeysDbModel(
     val next:Long?,
     val chatId:String,
     )
+//todo use foreign key

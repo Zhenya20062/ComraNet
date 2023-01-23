@@ -45,19 +45,19 @@ class PreferencesViewModel @Inject constructor(
         }
     }
 
-    fun updateColor(value: Color, colorCustomizer: ColorCustomizer) {
-        when (colorCustomizer) {
-            YOUR_MESSAGE -> config = config.copy(colorOfReceiverMessage = value)
-            SENDER_MESSAGE -> config.copy(colorOfSenderMessage = value).also { config = it }
-            APP_BAR -> config = config.copy(colorOfAppBar = value)
-            ICON_SECTION -> config = config.copy(colorOfIconSection = value)
-            MESSAGE_USERNAME -> config = config.copy(colorOfMessageUsername = value)
-            MESSAGE_TEXT -> config = config.copy(colorOfMessageText = value)
-            MESSAGE_DATE -> config = config.copy(colorOfMessageDate = value)
-            DATE_DIVIDER_BACKGROUND -> config = config.copy(colorOfDateDividerBackground = value)
-            DATE_DIVIDER_TEXT -> config = config.copy(colorOfDateDividerText = value)
-            else -> {}
-        }
-    }
+//    fun updateColor(value: Color, colorCustomizer: ColorCustomizer) {
+//        when (colorCustomizer) {
+//            YOUR_MESSAGE -> config = config.copy(colorOfReceiverMessage = value)
+//            SENDER_MESSAGE -> config.copy(colorOfSenderMessage = value).also { config = it }
+//            APP_BAR -> config = config.copy(colorOfAppBar = value)
+//            ICON_SECTION -> config = config.copy(colorOfIconSection = value)
+//            MESSAGE_USERNAME -> config = config.copy(colorOfMessageUsername = value)
+//            MESSAGE_TEXT -> config = config.copy(colorOfMessageText = value)
+//            MESSAGE_DATE -> config = config.copy(colorOfMessageDate = value)
+//            DATE_DIVIDER_BACKGROUND -> config = config.copy(colorOfDateDividerBackground = value)
+//            DATE_DIVIDER_TEXT -> config = config.copy(colorOfDateDividerText = value)
+//            else -> {}
+//        }
+//    }
 
 }

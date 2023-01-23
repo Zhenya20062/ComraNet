@@ -3,6 +3,7 @@ package com.euzhene.comranet.autorization.presentation.screen
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -35,36 +36,25 @@ import com.euzhene.comranet.autorization.presentation.AuthViewModel
 import com.euzhene.comranet.destinations.AllChatsScreenDestination
 import com.euzhene.comranet.destinations.LoginScreenDestination
 import com.euzhene.comranet.destinations.RegisterScreenDestination
+import com.euzhene.comranet.util.RegisterTransition
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.popUpTo
+import com.ramcosta.composedestinations.spec.DestinationStyle
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 
 
 @RootNavGraph(true)
 @Composable
-@Destination
+@Destination(style = RegisterTransition::class)
 fun RegisterScreen(
     navigator: DestinationsNavigator,
     viewModel: AuthViewModel,
 ) {
-    if (viewModel.shouldGoToChatRoom.value) {
-        LaunchedEffect(key1 = Unit) {
-            navigator.navigate(AllChatsScreenDestination()) {
-                popUpTo(RegisterScreenDestination) { inclusive = true }
-            }
-        }
-
-    }
     if (viewModel.shouldShowDialog.value) {
         LoadingAlertDialog()
-    }
-
-    if (viewModel.isLoading.value) {
-        SplashScreen()
-        return
     }
 
     AuthScaffold(snackbarMessageFlow = viewModel.toastMessage) {

@@ -3,6 +3,7 @@ package com.euzhene.comranet.preferences.presentation
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -53,7 +54,7 @@ fun PreferenceScreen(
     viewModel: PreferencesViewModel,
 ) {
     Scaffold(topBar = {
-        TopAppBar(backgroundColor = viewModel.config.colorOfAppBar, navigationIcon = {
+        TopAppBar(backgroundColor = viewModel.config.chatTheme.appbarBackground, navigationIcon = {
             IconButton(onClick = {
                 viewModel.saveConfigAndExit()
                 navigator.popBackStack()
@@ -77,10 +78,10 @@ fun PreferenceScreen(
                 }, config = viewModel.config)
 
                 BackgroundPreferenceItem(onBackgroundChange = {
-                    viewModel.config = viewModel.config.copy(background = it)
+                    viewModel.config = viewModel.config.copy(photoBackground = it)
                 })
                 ColorPreferenceItems(onColorChange = { i: Color, b: ColorCustomizer ->
-                    viewModel.updateColor(i, b)
+                  //  viewModel.updateColor(i, b)
                 })
             }
         }
@@ -288,7 +289,7 @@ fun FontPreferenceItem(onValueChange: (Float) -> Unit, config: PreferencesConfig
                 .wrapContentHeight()
         ) {
             ChatBackground(
-                background = config.background,
+                config = config,
                 Modifier
                     .fillMaxWidth()
                     .height(with(LocalDensity.current) { (height).toDp() }),
@@ -301,11 +302,11 @@ fun FontPreferenceItem(onValueChange: (Float) -> Unit, config: PreferencesConfig
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = config.colorOfDateDividerBackground
+                        color = config.chatTheme.dateDividerBackground
                     ) {
                         Text(
                             text = mapTimestampToDate(1660575812000, D_MMM_YYYY),
-                            color = config.colorOfDateDividerText,
+                            color = config.chatTheme.dateDividerText,
                             modifier = Modifier.padding(5.dp)
                         )
                     }
@@ -346,14 +347,16 @@ fun FontPreferenceItem(onValueChange: (Float) -> Unit, config: PreferencesConfig
 }
 
 @Composable
-fun ChatBackground(background: String?, modifier: Modifier = Modifier) {
-    AsyncImage(
-        model = background
-            ?: LocalContext.current.getDrawable(R.drawable.ic_back_official)!!,
-        contentDescription = "chat background",
-        alpha = 0.99f,
-        contentScale = ContentScale.Crop,
-        modifier = modifier,
-        colorFilter = if (background == null) ColorFilter.tint(Color(0xff9dd3f5)) else null
-    )
+fun ChatBackground(config: PreferencesConfig, modifier: Modifier = Modifier) {
+    if (config.photoBackground != null) {
+        AsyncImage(
+            model = config.photoBackground,
+            contentDescription = "chat background",
+            contentScale = ContentScale.Crop,
+            modifier = modifier,
+        )
+    } else {
+        Box(modifier = modifier.background(config.chatTheme.chatRoomBackground))
+    }
+
 }

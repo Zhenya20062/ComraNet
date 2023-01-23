@@ -1,26 +1,32 @@
 package com.euzhene.comranet.chatRoom.data.paging
 
+import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import com.euzhene.comranet.chatRoom.data.local.ChatRoomDatabase
+import com.euzhene.comranet.TAG_DATA
+import com.euzhene.comranet.chatRoom.data.local.ComranetRoomDatabase
 import com.euzhene.comranet.chatRoom.data.local.model.ChatDataDbModel
 import com.euzhene.comranet.chatRoom.data.local.model.ChatRemoteKeysDbModel
 import com.euzhene.comranet.chatRoom.data.mapper.ChatRoomMapper
-import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseData
-import com.google.firebase.database.Query
+import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseDataModel
+import com.euzhene.comranet.getSenderNameFromUserQuery
+import com.google.firebase.Timestamp
 import kotlinx.coroutines.tasks.await
+import java.sql.Date
 
 @OptIn(ExperimentalPagingApi::class)
 class ChatRoomRemoteMediator(
-    private val chatRoomDatabase: ChatRoomDatabase,
-    private val query: Query,
+    private val chatRoomDatabase: ComranetRoomDatabase,
+    private val messagesQuery: com.google.firebase.firestore.Query,
+    private val senderNameFromUserQuery: com.google.firebase.firestore.Query,
     private val mapper: ChatRoomMapper,
     private val userId: String,
     private val chatId: String,
 ) : RemoteMediator<Int, ChatDataDbModel>() {
+
     private val chatDataDao = chatRoomDatabase.chatDataDao()
     private val remoteKeysDao = chatRoomDatabase.chatDataRemoteKeysDao()
 
@@ -48,25 +54,37 @@ class ChatRoomRemoteMediator(
                 }
 
             }
-            val snapshot = if (currentPage == null) query.get().await()
-            else query.endBefore(currentPage.toDouble()).get().await()
 
-            val endOfPaginationReached = !snapshot.hasChildren()
+            val snapshot = if (currentPage == null) messagesQuery
+                .limit(state.config.initialLoadSize.toLong())
+                .get().await()
+            else messagesQuery.startAfter(Timestamp(Date(currentPage)))
+                .limit(state.config.pageSize.toLong())
+                .get().await()
 
-            val firebaseDataList = snapshot.children.map {
-                val data = it.getValue(FirebaseData::class.java) ?: throw RuntimeException(
+            val endOfPaginationReached = snapshot.isEmpty
+
+            if (endOfPaginationReached) {
+                return MediatorResult.Success(true)
+            }
+
+            val firebaseDataList = snapshot.documents.map {
+                val data = it.toObject(FirebaseDataModel::class.java) ?: throw RuntimeException(
                     "Impossible to convert this data snapshot into FirebaseData"
                 )
-                data.copy(messageId = it.key.toString())
+                var senderName = ""
+                if (data.sender_id != userId) {
+                    senderName =
+                        getSenderNameFromUserQuery(data.sender_id)!!
+                }
+
+                data.copy(message_id = it.id, senderName = senderName)
             }.toMutableList()
 
-            if (currentPage == null && firebaseDataList.isNotEmpty()) firebaseDataList.removeLast()
+            val chatDataDbList = firebaseDataList.map { mapper.mapDtoToDbModel(it) }
 
-            val chatDataDbList = firebaseDataList
-                .map { mapper.mapDtoToDbModel(it, userId, chatId) }
-
-            val nextPage = if (endOfPaginationReached) null else chatDataDbList.first().timestamp
-            val prevPage = if (currentPage == null) null else chatDataDbList.last().timestamp
+            val nextPage = chatDataDbList.last().timestamp
+            val prevPage = if (currentPage == null) null else chatDataDbList.first().timestamp
             chatRoomDatabase.withTransaction {
                 if (loadType == LoadType.REFRESH) {
                     chatDataDao.deleteAll(chatId)
@@ -83,8 +101,9 @@ class ChatRoomRemoteMediator(
                 chatDataDao.insertChatDataList(chatDataDbList)
                 remoteKeysDao.insertAll(keys)
             }
-            MediatorResult.Success(endOfPaginationReached)
+            MediatorResult.Success(false)
         } catch (e: Exception) {
+            Log.d(TAG_DATA, "error: $e")
             MediatorResult.Error(e)
         }
     }

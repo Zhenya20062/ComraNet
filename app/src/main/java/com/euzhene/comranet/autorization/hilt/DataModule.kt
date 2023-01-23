@@ -3,6 +3,7 @@ package com.euzhene.comranet.autorization.hilt
 import com.euzhene.comranet.autorization.data.AuthRepoImpl
 import com.euzhene.comranet.userImageStorage
 import com.euzhene.comranet.userReference
+import com.euzhene.comranet.usersFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,6 +16,6 @@ import javax.inject.Singleton
 class DataModule {
     @Provides
     fun provideAuthImpl(): AuthRepoImpl {
-        return AuthRepoImpl(userReference, userImageStorage)
+        return AuthRepoImpl(usersFirestore(), userImageStorage)
     }
 }

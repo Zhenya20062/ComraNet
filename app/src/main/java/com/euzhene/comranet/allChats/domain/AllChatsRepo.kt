@@ -6,6 +6,7 @@ import com.euzhene.comranet.util.Response
 import kotlinx.coroutines.flow.Flow
 
 interface AllChatsRepo {
-    fun observeChats(): Flow<ChatInfoWithId>
-    fun getAllChats(): Flow<PagingData<ChatInfoWithId>>
+    suspend fun observeNewChats()
+    fun getAllChats(): Flow<PagingData<ChatInfo>>
+    suspend fun getChatInfoCount():Int
 }

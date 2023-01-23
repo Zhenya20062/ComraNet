@@ -20,6 +20,7 @@ interface ChatRemoteKeysDao {
     @Insert(entity = ChatRemoteKeysDbModel::class, onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(remoteKey:ChatRemoteKeysDbModel)
 
-    @Query("delete from chat_remote_keys where chatId=:chatId and timestamp != (select timestamp from chat_remote_keys where chatId=:chatId order by timestamp desc limit 1)")
+    //"delete from chat_remote_keys where chatId=:chatId and timestamp != (select timestamp from chat_remote_keys where chatId=:chatId order by timestamp desc limit 1)"
+    @Query("delete from chat_remote_keys where chatId=:chatId")
     suspend fun deleteAll(chatId: String)
 }

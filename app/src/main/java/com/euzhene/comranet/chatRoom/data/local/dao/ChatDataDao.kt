@@ -11,10 +11,10 @@ interface ChatDataDao {
     fun getChatDataList(chatId: String): PagingSource<Int, ChatDataDbModel>
 
     @Query("select * from chat_data where messageId=:messageId")
-    suspend fun getChatDataByMessageId(messageId:String):ChatDataDbModel
+    suspend fun getChatDataByMessageId(messageId:String):ChatDataDbModel?
 
-    @Query("select * from chat_data where chatId=:chatId order by timestamp desc limit 1")
-    suspend fun getLastItem(chatId: String): ChatDataDbModel
+    //@Query("select * from chat_data where chatId=:chatId order by timestamp desc limit 1")
+   // suspend fun getLastItem(chatId: String): ChatDataDbModel
 
     @Insert(entity = ChatDataDbModel::class, onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChatDataList(chatDataList: List<ChatDataDbModel>)
@@ -22,7 +22,8 @@ interface ChatDataDao {
     @Insert(entity = ChatDataDbModel::class, onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChatData(chatData: ChatDataDbModel)
 
-    @Query("delete from chat_data where chatId=:chatId and messageId != (select messageId from chat_data where chatId=:chatId order by timestamp desc limit 1)")
+    //"delete from chat_data where chatId=:chatId and messageId != (select messageId from chat_data where chatId=:chatId order by timestamp desc limit 1)"
+    @Query("delete from chat_data where chatId=:chatId")
     suspend fun deleteAll(chatId: String)
 
     @Query("update chat_data set data=:data where messageId=:messageId")

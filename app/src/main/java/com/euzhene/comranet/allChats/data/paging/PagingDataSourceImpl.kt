@@ -1,20 +1,16 @@
 package com.euzhene.comranet.allChats.data.paging
 
 import androidx.paging.*
+import com.euzhene.comranet.*
 import com.euzhene.comranet.allChats.data.local.model.ChatInfoDbModel
 import com.euzhene.comranet.allChats.data.mapper.AllChatsMapper
-import com.euzhene.comranet.chatRoom.data.local.ChatRoomDatabase
-import com.euzhene.comranet.chatRoom.data.local.model.ChatDataDbModel
-import com.euzhene.comranet.chatRoom.data.mapper.ChatRoomMapper
-import com.euzhene.comranet.chatMessages
-import com.euzhene.comranet.firebaseChatReference
-import com.euzhene.comranet.userReference
+import com.euzhene.comranet.chatRoom.data.local.ComranetRoomDatabase
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.Flow
 
 class PagingDataSourceImpl(
     private val mapper: AllChatsMapper,
-    private val roomDatabase: ChatRoomDatabase,
+    private val roomDatabase: ComranetRoomDatabase,
     private val user: FirebaseUser,
 ) : PagingDataSource {
 
@@ -30,7 +26,10 @@ class PagingDataSourceImpl(
             pagingSourceFactory = pagingSourceFactory,
             remoteMediator = AllChatsRemoteMediator(
                 roomDatabase,
-                userReference.child(user.uid).child("chats"),
+                chatInfoFirestore(),
+                chatMembersFirestore()
+                    .orderBy(FIRESTORE_CHAT_ID_NAME)
+                    .whereEqualTo(FIRESTORE_USER_ID_NAME, user.uid),
                 mapper,
             )
         ).flow
@@ -38,8 +37,8 @@ class PagingDataSourceImpl(
 
 
     companion object {
-        const val PAGE_SIZE = 20
-        private const val INITIAL_LOAD_SIZE = PAGE_SIZE
-        private const val PREFETCH_DISTANCE = 3
+        const val PAGE_SIZE = 15
+        private const val INITIAL_LOAD_SIZE = PAGE_SIZE * 2
+        private const val PREFETCH_DISTANCE = 5
     }
 }

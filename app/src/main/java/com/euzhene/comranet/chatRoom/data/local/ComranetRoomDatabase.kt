@@ -17,26 +17,26 @@ import com.euzhene.comranet.chatRoom.data.local.model.ChatRemoteKeysDbModel
 
 @Database(
     entities = [ChatDataDbModel::class, ChatRemoteKeysDbModel::class, ChatInfoDbModel::class, ChatInfoRemoteKeysDbModel::class],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 @TypeConverters(MemberListConverter::class)
-abstract class ChatRoomDatabase : RoomDatabase() {
+abstract class ComranetRoomDatabase : RoomDatabase() {
     abstract fun chatDataDao(): ChatDataDao
     abstract fun chatDataRemoteKeysDao(): ChatRemoteKeysDao
     abstract fun chatInfoDao(): ChatInfoDao
     abstract fun chatInfoRemoteKeysDao():ChatInfoRemoteKeysDao
 
     companion object {
-        private var INSTANCE: ChatRoomDatabase? = null
+        private var INSTANCE: ComranetRoomDatabase? = null
         private val LOCK = Any()
         private const val DB_NAME = "chat_db"
 
-        fun getInstance(context: Context): ChatRoomDatabase {
+        fun getInstance(context: Context): ComranetRoomDatabase {
             INSTANCE?.let { return it }
             synchronized(LOCK) {
                 INSTANCE?.let { return it }
-                val db = Room.databaseBuilder(context, ChatRoomDatabase::class.java, DB_NAME)
+                val db = Room.databaseBuilder(context, ComranetRoomDatabase::class.java, DB_NAME)
                     .fallbackToDestructiveMigration()
                     .addTypeConverter(MemberListConverter())
                     .build()

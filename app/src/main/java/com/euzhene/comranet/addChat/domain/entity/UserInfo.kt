@@ -1,9 +1,12 @@
 package com.euzhene.comranet.addChat.domain.entity
 
-import android.net.Uri
+import androidx.annotation.Keep
 
+@Keep
 data class UserInfo(
     val username: String,
     val login: String,
-    val photoUrl: String?
-)
+    val photo_url: String?
+) {
+    constructor():this("","",null)
+}

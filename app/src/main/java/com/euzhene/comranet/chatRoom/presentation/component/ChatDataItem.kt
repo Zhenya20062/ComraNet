@@ -1,18 +1,17 @@
 package com.euzhene.comranet.chatRoom.presentation.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,18 +31,21 @@ fun ChatDataItem(
     onImageClick: () -> Unit,
     onPollOptionClick: (Int) -> Unit,
 ) {
-    val backgroundColor =
-        if (chatData.owner) config.colorOfReceiverMessage
-        else config.colorOfSenderMessage
+    val theme = config.chatTheme
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
         contentAlignment = if (chatData.owner) Alignment.CenterEnd else Alignment.CenterStart
     ) {
-        Card(
-            backgroundColor = backgroundColor,
-            shape = chatDataCardShape(owner = chatData.owner)
+        Box(
+            modifier = chatDataCardShape(
+                owner = chatData.owner,
+                color = if (chatData.owner) theme.messageReceiverBackground else theme.messageSenderBackground
+            ).background(
+                if (chatData.owner) theme.messageReceiverBackground else theme.messageSenderBackground,
+                RoundedCornerShape(12.dp)
+            )
         ) {
             Column(
                 modifier = Modifier
@@ -51,14 +53,14 @@ fun ChatDataItem(
                     .padding(start = 4.dp, end = 4.dp, top = 4.dp),
             ) {
                 if (!chatData.owner) {
-                    Name(chatData.senderUsername, config.colorOfMessageUsername)
+                    Name(chatData.senderUsername, theme.messageSenderName)
                 }
 
                 if (chatData.type == ChatDataType.MESSAGE) {
                     Message(
                         message = chatData.data,
                         fontSize = config.fontSize,
-                        color = config.colorOfMessageText
+                        color = if (chatData.owner) theme.messageReceiverContent else theme.messageSenderContent
                     )
                 } else if (chatData.type == ChatDataType.IMAGE) {
                     Picture(url = chatData.data, onImageClick = onImageClick)
@@ -69,7 +71,7 @@ fun ChatDataItem(
                 Date(
                     date = mapTimestampToDate(chatData.timestamp, H_MM),
                     Modifier.align(Alignment.End),
-                    color = config.colorOfMessageDate
+                    color = if (chatData.owner) theme.messageReceiverTime else theme.messageSenderTime
                 )
             }
 
@@ -168,11 +170,35 @@ fun Date(date: String, modifier: Modifier, color: Color) {
 }
 
 @Composable
-fun chatDataCardShape(owner: Boolean): Shape {
-    val roundedCorner = RoundedCornerShape(12.dp)
-    return if (owner) {
-        roundedCorner.copy(bottomEnd = CornerSize(0))
-    } else {
-        roundedCorner.copy(bottomStart = CornerSize(0))
+fun chatDataCardShape(owner: Boolean, color: Color): Modifier {
+    return Modifier.drawBehind {
+        val cornerRadius = 15.dp.toPx()
+        val triangleWidth = 9.dp.toPx()
+        val trianglePath = Path().apply {
+            if (owner) {
+                moveTo(size.width, size.height - cornerRadius)
+                quadraticBezierTo(
+                    size.width - 2,
+                    size.height - cornerRadius,
+                    size.width + 10,
+                    size.height
+                )
+                lineTo(
+                    size.width - triangleWidth,
+                    size.height
+                )
+            } else {
+                moveTo(0f, size.height - cornerRadius)
+                quadraticBezierTo(
+                    2f,
+                    size.height - cornerRadius,
+                    -10f,
+                    size.height
+                )
+                lineTo(triangleWidth, size.height)
+            }
+            close()
+        }
+        drawPath(trianglePath, color)
     }
 }

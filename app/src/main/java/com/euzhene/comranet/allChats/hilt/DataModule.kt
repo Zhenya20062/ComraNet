@@ -4,9 +4,9 @@ import com.euzhene.comranet.allChats.data.AllChatsRepoImpl
 import com.euzhene.comranet.allChats.data.mapper.AllChatsMapper
 import com.euzhene.comranet.allChats.data.paging.PagingDataSource
 import com.euzhene.comranet.allChats.data.paging.PagingDataSourceImpl
-import com.euzhene.comranet.chatRoom.data.local.ChatRoomDatabase
-import com.euzhene.comranet.firebaseChatReference
-import com.euzhene.comranet.userReference
+import com.euzhene.comranet.chatRoom.data.local.ComranetRoomDatabase
+import com.euzhene.comranet.chatRoom.data.remote.RemoteDatabase
+import com.euzhene.comranet.chatRoom.data.remote.RemoteDatabaseFirestore
 import com.google.firebase.auth.FirebaseUser
 import dagger.Module
 import dagger.Provides
@@ -21,8 +21,10 @@ class DataModule {
     fun provideAllChatsRepoImpl(
         user: FirebaseUser,
         pagingDataSource: PagingDataSource,
+        roomDatabase: ComranetRoomDatabase,
+        remoteDatabase: RemoteDatabaseFirestore,
     ): AllChatsRepoImpl {
-        return AllChatsRepoImpl(firebaseChatReference, userReference, user, pagingDataSource)
+        return AllChatsRepoImpl(user, pagingDataSource, roomDatabase,remoteDatabase)
     }
 
     @ViewModelScoped
@@ -35,7 +37,7 @@ class DataModule {
     @Provides
     fun providePagingDataSourceImpl(
         mapper: AllChatsMapper,
-        roomDatabase: ChatRoomDatabase,
+        roomDatabase: ComranetRoomDatabase,
         user: FirebaseUser,
     ): PagingDataSourceImpl {
         return PagingDataSourceImpl(

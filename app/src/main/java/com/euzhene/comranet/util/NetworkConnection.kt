@@ -1,6 +1,5 @@
 package com.euzhene.comranet.util
 
-import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
@@ -38,7 +37,6 @@ class NetworkConnection{
                 ) {
                     super.onCapabilitiesChanged(network, networkCapabilities)
                     onCapabilitiesChanged?.invoke()
-
                 }
 
                 // lost network connection

@@ -6,11 +6,13 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "chat_data")
 data class ChatDataDbModel(
-    @PrimaryKey val timestamp: Long,
+    @PrimaryKey
+    val messageId:String,
+    val timestamp: Long,
     val senderUsername: String,
     val owner: Boolean,
     val type:String,
     val data:String,
     val chatId:String,
-    val messageId:String,
+
 )

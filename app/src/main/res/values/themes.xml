@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.ComraNet" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/purple_700</item>
+
+    <style name="Theme.Comranet" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/fui_transparent</item>
     </style>
-    <style name="SplashTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="android:windowBackground">@drawable/splash</item>
-<!--        <item name="colorPrimary">@color/purple_500</item>-->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+
+    <style name="SplashTheme" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/euzhene_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.Comranet</item>
     </style>
+
 </resources>

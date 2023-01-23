@@ -1,10 +1,14 @@
 package com.euzhene.comranet.chatRoom.data.remote
 
 import android.net.Uri
+import com.euzhene.comranet.addChat.domain.entity.ChatInfo
+import com.euzhene.comranet.allChats.domain.ChatInfoWithId
 import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseChangeData
-import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseData
-import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseSendData
+import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseDataModel
+import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseSendDataModel
 import com.euzhene.comranet.chatRoom.domain.entity.ChatDataType
+import com.euzhene.comranet.getMyUserRef
+import com.euzhene.comranet.getUserGroup
 import com.euzhene.comranet.imageStorage
 import com.euzhene.comranet.util.Response
 import com.google.firebase.database.ChildEventListener
@@ -18,14 +22,14 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.util.*
 
-class RemoteDatabaseImpl(
+class FirebaseDatabaseImpl(
     private val chatRef: DatabaseReference,
     private val userRef: DatabaseReference,
 ) : RemoteDatabase {
     override var chatId: String = ""
     override var userId: String = ""
 
-    override suspend fun addFirebaseData(firebaseData: FirebaseSendData): Flow<Response<Unit>> {
+    override suspend fun addFirebaseData(firebaseData: FirebaseSendDataModel): Flow<Response<Unit>> {
         return callbackFlow {
             trySend(Response.Loading())
             when (firebaseData.type) {
@@ -87,9 +91,9 @@ class RemoteDatabaseImpl(
                 chatRef.child(chatId).child("messages").limitToLast(1).get()
                     .addOnCompleteListener {
                         if (it.isSuccessful) {
-                            val lastData = it.result!!.children.first().getValue<FirebaseData>()!!
-                                .copy(messageId = it.result!!.children.first().key.toString())
-                            if (lastData.messageId == firebaseData.messageId) {
+                            val lastData = it.result!!.children.first().getValue<FirebaseDataModel>()!!
+                                .copy(message_id = it.result!!.children.first().key.toString())
+                            if (lastData.message_id == firebaseData.messageId) {
                                 changeLastMessage(firebaseData, onError, onComplete)
                             }
                         } else {
@@ -147,7 +151,7 @@ class RemoteDatabaseImpl(
     }
 
     private fun updateLastMessage(
-        firebaseData: FirebaseSendData,
+        firebaseData: FirebaseSendDataModel,
         onComplete: () -> Unit,
         onError: () -> Unit
     ) {
@@ -160,17 +164,17 @@ class RemoteDatabaseImpl(
                             chatRef.child(chatId).child("last_message")
                                 .child("last_message").apply {
                                     removeValue().addOnCompleteListener {
-                                        if (it.isSuccessful) {
-                                            setValue(firebaseData.copy(messageId = messageId)).addOnCompleteListener {
-                                                if (it.isSuccessful) {
-                                                    onComplete()
-                                                } else {
-                                                    onError()
-                                                }
-                                            }
-                                        } else {
-                                            onError()
-                                        }
+//                                        if (it.isSuccessful) {
+//                                            setValue(firebaseData.copy(messageId = messageId)).addOnCompleteListener {
+//                                                if (it.isSuccessful) {
+//                                                    onComplete()
+//                                                } else {
+//                                                    onError()
+//                                                }
+//                                            }
+//                                        } else {
+//                                            onError()
+//                                        }
 
                                     }
                                 }
@@ -183,22 +187,22 @@ class RemoteDatabaseImpl(
 
     }
 
-    override fun observeNewFirebaseData(): Flow<FirebaseData> {
+    var isFirstData= true
+    override fun observeNewFirebaseData(): Flow<FirebaseDataModel> {
         return callbackFlow {
             chatRef.child(chatId).child("last_message")
                 .addChildEventListener(object : ChildEventListener {
-                    override fun onChildChanged(
-                        snapshot: DataSnapshot,
-                        previousChildName: String?
-                    ) {
-                    }
-
+                    override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
                     override fun onChildRemoved(snapshot: DataSnapshot) {}
                     override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
                     override fun onCancelled(error: DatabaseError) {}
 
                     override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-                        val firebaseData = snapshot.getValue(FirebaseData::class.java)
+                        if (isFirstData) {
+                            isFirstData = false
+                            return
+                        }
+                        val firebaseData = snapshot.getValue(FirebaseDataModel::class.java)
 
                         trySend(firebaseData!!)
                     }
@@ -207,7 +211,7 @@ class RemoteDatabaseImpl(
         }
     }
 
-    override fun observeChangedFirebaseData(): Flow<FirebaseData> {
+    override fun observeChangedFirebaseData(): Flow<FirebaseDataModel> {
         return callbackFlow {
             chatRef.child(chatId).child("messages")
                 .addChildEventListener(object : ChildEventListener {
@@ -220,11 +224,25 @@ class RemoteDatabaseImpl(
                         snapshot: DataSnapshot,
                         previousChildName: String?
                     ) {
-                        val firebaseData = snapshot.getValue(FirebaseData::class.java)
-                        trySend(firebaseData!!.copy(messageId = snapshot.key.toString()))
+                        val firebaseData = snapshot.getValue(FirebaseDataModel::class.java)
+                        trySend(firebaseData!!.copy(message_id = snapshot.key.toString()))
                     }
 
                 })
+            awaitClose()
+        }
+    }
+
+    override fun getGroupInfo(): Flow<Result<ChatInfo>> {
+        return callbackFlow {
+            getUserGroup(userId, chatId).get().addOnCompleteListener {
+                if (it.isSuccessful) {
+                    val chatInfo = it.result!!.getValue<ChatInfo>()!!
+                    trySend(Result.success(chatInfo))
+                } else {
+                    trySend(Result.failure(it.exception!!))
+                }
+            }
             awaitClose()
         }
     }
@@ -238,11 +256,43 @@ class RemoteDatabaseImpl(
         val notificationList = mutableListOf<String>()
         userRef.get().await().children.forEach {
             if (users.contains(it.key)) {
-                val notification = it.child("notification_id").value.toString()
-                notificationList.add(notification)
+                val notification = it.child("notification_id").value
+                if (notification != null) {
+                    notificationList.add(notification.toString())
+                }
             }
         }
         return notificationList
+    }
+
+    override fun observeNewChat(): Flow<ChatInfoWithId> {
+        return callbackFlow {
+            getMyUserRef(userId).child("chats").addChildEventListener(
+                object : ChildEventListener {
+                    override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+
+                        val chat = snapshot.getValue<ChatInfo>()!!
+                        val chatWithId = ChatInfoWithId(chatId = snapshot.key!!, chatInfo = chat)
+                        trySend(chatWithId)
+                    }
+
+                    override fun onChildChanged(
+                        snapshot: DataSnapshot,
+                        previousChildName: String?
+                    ) {
+                        // TODO: handle when chats are changed
+                    }
+
+                    override fun onChildRemoved(snapshot: DataSnapshot) {
+                        // TODO: handle when chat is deleted
+                    }
+                    override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+                    override fun onCancelled(error: DatabaseError) {}
+
+                }
+            )
+            awaitClose()
+        }
     }
 
 }

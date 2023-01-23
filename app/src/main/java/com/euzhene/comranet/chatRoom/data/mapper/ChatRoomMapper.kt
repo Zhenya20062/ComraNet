@@ -2,20 +2,20 @@ package com.euzhene.comranet.chatRoom.data.mapper
 
 import com.euzhene.comranet.chatRoom.data.local.model.ChatDataDbModel
 import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseChangeData
-import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseData
-import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseSendData
+import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseDataModel
+import com.euzhene.comranet.chatRoom.data.remote.dto.FirebaseSendDataModel
 import com.euzhene.comranet.chatRoom.domain.entity.ChatData
 import com.euzhene.comranet.chatRoom.domain.entity.ChatDataType
-import com.google.firebase.auth.FirebaseUser
-import javax.inject.Inject
 
-class ChatRoomMapper @Inject constructor() {
-    fun mapEntityToDto(type: ChatDataType, data: String, user: FirebaseUser): FirebaseSendData {
-        return FirebaseSendData(
-            senderUsername = user.displayName!!,
-            senderId = user.uid,
+class ChatRoomMapper(
+   private val userId: String,
+) {
+    fun mapEntityToDto(type: ChatDataType, data: String, chatId:String): FirebaseSendDataModel {
+        return FirebaseSendDataModel(
+            sender_id = userId,
             type = type,
             data = data,
+            chat_id = chatId
         )
     }
 
@@ -26,30 +26,26 @@ class ChatRoomMapper @Inject constructor() {
         )
     }
 
-    fun mapDtoToEntity(firebaseData: FirebaseData, userId: String): ChatData {
-        return ChatData(
-            messageId = firebaseData.messageId,
-            timestamp = firebaseData.timestamp,
-            senderUsername = firebaseData.senderUsername,
-            owner = firebaseData.senderId == userId,
-            type = ChatDataType.valueOf(firebaseData.type),
-            data = firebaseData.data,
-        )
-    }
+//    fun mapDtoToEntity(firebaseData: FirebaseDataModel): ChatData {
+//        return ChatData(
+//            messageId = firebaseData.messageId,
+//            timestamp = firebaseData.timestamp,
+//            senderUsername = firebaseData.senderName,
+//            owner = firebaseData.senderId == userId,
+//            type = ChatDataType.valueOf(firebaseData.type),
+//            data = firebaseData.data,
+//        )
+//    }
 
-    fun mapDtoToDbModel(
-        firebaseData: FirebaseData,
-        userId: String,
-        chatId: String
-    ): ChatDataDbModel {
+    fun mapDtoToDbModel(firebaseData: FirebaseDataModel): ChatDataDbModel {
         return ChatDataDbModel(
-            timestamp = firebaseData.timestamp,
-            senderUsername = firebaseData.senderUsername,
-            owner = firebaseData.senderId == userId,
+            timestamp = firebaseData.timestamp.seconds*1000,
+            senderUsername = firebaseData.senderName,
+            owner = firebaseData.sender_id == userId,
             type = firebaseData.type,
             data = firebaseData.data,
-            chatId = chatId,
-            messageId = firebaseData.messageId,
+            chatId = firebaseData.chat_id,
+            messageId = firebaseData.message_id,
         )
     }
 

@@ -7,5 +7,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface AddChatRepo {
     fun createChat(chatInfo: ChatInfo, userLogins:List<String>): Flow<Response<Unit>>
-    suspend fun getAllUsers(): List<UserInfo>
+    suspend fun getAllUsers(): Flow<Response<List<UserInfo>>>
 }

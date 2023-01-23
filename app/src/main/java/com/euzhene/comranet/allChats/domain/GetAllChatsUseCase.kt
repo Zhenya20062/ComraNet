@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetAllChatsUseCase @Inject constructor (private val repo: AllChatsRepo) {
-    operator fun invoke(): Flow<PagingData<ChatInfoWithId>> {
+    operator fun invoke(): Flow<PagingData<ChatInfo>> {
         return repo.getAllChats()
     }
 }

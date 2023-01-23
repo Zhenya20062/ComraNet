@@ -71,7 +71,8 @@ fun WatchImageScreen(
             AsyncImage(
                 model = url,
                 contentDescription = "Clicked image",
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .align(Alignment.Center)
                     .graphicsLayer {
                         scaleX = maxOf(.5f, minOf(3f, scale))
@@ -92,6 +93,7 @@ fun SendImageScreen(
     viewModel: ChatRoomViewModel,
     chatId: String,
 ) {
+
     Scaffold(topBar = {
         TopAppBar(title = {}, navigationIcon = {
             IconButton(onClick = { navigator.popBackStack() }) {
